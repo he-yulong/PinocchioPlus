@@ -14,3 +14,5 @@ This repository is conducting a research on the paper "Automatic Rigging and ani
 - Additional useful papers
   - [Penalty functions for automatic rigging and animation of 3d characters](https://people.csail.mit.edu/ibaran/papers/2007-SIGGRAPH-Pinocchio-Penalty.pdf) presents more implementation details.
   - (https://www.jianshu.com/p/763a682c13cc) Paper explaination.
+- Datasets
+  - [RigNet](https://github.com/zhan-xu/RigNet)
