@@ -2,7 +2,13 @@
 
 This repository is conducting a research on the paper "Automatic Rigging and animation of 3D characters".
 
+## Installation
 
+### Ubuntu 18.04
+
+[jingma-git/Pinocchio](https://github.com/jingma-git/Pinocchio) dependencies:
+- `sudo apt-get install libfltk1.3-dev`
+- `sudo apt-get install libxrender-dev libxcursor-dev libxft-dev libfontconfig-dev libxinerama-dev`
 
 ## Useful References
 
