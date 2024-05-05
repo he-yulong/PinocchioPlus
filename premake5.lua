@@ -29,4 +29,5 @@ workspace "PinocchioPlus"
 
 
     include "PinocchioJingma"
+    include "PinocchioPlus"
 
