@@ -1,3 +1,10 @@
+obj_files/
+
+# For premake
+bin/
+bin-int/
+project-files/
+
 # Prerequisites
 *.d
 

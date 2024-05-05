@@ -10,6 +10,32 @@ This repository is conducting a research on the paper "Automatic Rigging and ani
 - `sudo apt-get install libfltk1.3-dev`
 - `sudo apt-get install libxrender-dev libxcursor-dev libxft-dev libfontconfig-dev libxinerama-dev`
 
+#### cmake
+
+```
+# PinocchioJingma directory
+cmake ..
+make
+```
+
+#### premake
+
+```
+# root directory
+./generate-gmake2.sh 
+cd project-files
+make
+```
+
+Then you can check out the `bin` directory.
+
+
+Example:
+
+```
+./PinocchioJingmaDemoUI ../../../obj_files/2982_remesh.obj -motion ../../../PinocchioJingma/data/walk.txt
+```
+
 ## Useful References
 
 - Repository
