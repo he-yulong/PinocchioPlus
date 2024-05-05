@@ -37,3 +37,7 @@ project-files/
 *.exe
 *.out
 *.app
+/vendor/fltk-release-1.3.9/ide
+/vendor/fltk-release-1.3.2
+
+!/vendor/fltk-release-1.3.9/lib/*.lib

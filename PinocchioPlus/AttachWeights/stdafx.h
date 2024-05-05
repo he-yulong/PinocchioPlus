@@ -7,7 +7,7 @@
 
 
 #include <stdio.h>
-#ifdef WIN32		// Windows defs
+#ifdef _WIN32		// Windows defs
 #define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
 #include <tchar.h>
 

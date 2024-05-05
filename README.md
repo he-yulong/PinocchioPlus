@@ -2,9 +2,9 @@
 
 This repository is conducting a research on the paper "Automatic Rigging and animation of 3D characters".
 
-## Installation
+## 1 Installation
 
-### Ubuntu 18.04
+### 1.1 Ubuntu 18.04
 
 [jingma-git/Pinocchio](https://github.com/jingma-git/Pinocchio) dependencies:
 - `sudo apt-get install libfltk1.3-dev`
@@ -13,12 +13,12 @@ This repository is conducting a research on the paper "Automatic Rigging and ani
 #### cmake
 
 ```
-# PinocchioJingma directory
+# PinocchioJingma build directory
 cmake ..
 make
 ```
 
-#### premake
+#### premake5
 
 ```
 # root directory
@@ -36,7 +36,27 @@ Example:
 ./PinocchioJingmaDemoUI ../../../obj_files/2982_remesh.obj -motion ../../../PinocchioJingma/data/walk.txt
 ```
 
-## Useful References
+### 1.2 Windows (Visual Studio 2022)
+
+NOTE: 
+
+- Currently Windows compatibility only works for `PinocchioPlus***`.
+- **There will be runtime error in debug mode**, which might be fixed up in the future.
+
+click `generate-vs2022.bat`, then open up `PinocchioPlus.sln` in `project-files`.
+
+- `PinocchioPlus***` are our project implementations. 
+- `PinocchioJingma***` are from [jingma-git/Pinocchio](https://github.com/jingma-git/Pinocchio).
+
+All dependencies should be included.
+
+Example:
+
+```
+./PinocchioJingmaDemoUI ../obj_files/2982_remesh.obj -motion ../data/legacy/walk.txt
+```
+
+## 2 Useful References
 
 - Repository
   - [jingma-git/Pinocchio](https://github.com/jingma-git/Pinocchio)
@@ -45,6 +65,6 @@ Example:
   - [Pinocchio: Automatic Rigging and Animation of 3D Characters](https://www.youtube.com/watch?v=EklzamltEgM)
 - Additional useful papers
   - [Penalty functions for automatic rigging and animation of 3d characters](https://people.csail.mit.edu/ibaran/papers/2007-SIGGRAPH-Pinocchio-Penalty.pdf) presents more implementation details.
-  - (https://www.jianshu.com/p/763a682c13cc) Paper explaination.
+  - [Paper explaination](https://www.jianshu.com/p/763a682c13cc).
 - Datasets
   - [RigNet](https://github.com/zhan-xu/RigNet)

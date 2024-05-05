@@ -19,6 +19,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
+#pragma once
 
 #include <FL/Fl.H>
 #include "MyWindow.h"
@@ -27,14 +28,14 @@ THE SOFTWARE.
 
 int main(int argc, char **argv)
 {
-    MyWindow *window = new MyWindow();
+	MyWindow *window = new MyWindow();
 
-    vector<string> args;
-    for (int i = 0; i < argc; ++i)
-        args.push_back(argv[i]);
-    process(args, window);
+	vector<string> args;
+	for (int i = 0; i < argc; ++i)
+		args.push_back(argv[i]);
+	process(args, window);
 
-    window->show();
+	window->show();
 
-    return Fl::run();
+	return Fl::run();
 }
