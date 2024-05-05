@@ -19,7 +19,7 @@
 #ifndef DERIV_H_INCLUDED
 #define DERIV_H_INCLUDED
 
-#include "vector.h"
+#include "math/vector.h"
 
 template<class Real, int Vars>
 class Deriv

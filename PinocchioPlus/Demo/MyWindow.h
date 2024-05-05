@@ -24,7 +24,7 @@ THE SOFTWARE.
 #define MYWINDOW_H
 
 #include <FL/Fl_Gl_Window.H>
-#include "Pinocchio/Core.h"
+#include "pinocchio.h"
 #include "DisplayMesh.h"
 
 struct LineSegment

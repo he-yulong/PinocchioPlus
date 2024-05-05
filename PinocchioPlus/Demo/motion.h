@@ -23,7 +23,7 @@ THE SOFTWARE.
 #ifndef MOTION_H
 #define MOTION_H
 
-#include "Pinocchio/Core.h"
+#include "pinocchio.h"
 
 class Motion
 {

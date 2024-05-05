@@ -22,9 +22,9 @@
 #include <set>
 #include <algorithm>
 
-#include "vector.h"
+#include "math/vector.h"
 #include "rect.h"
-#include "vecutils.h"
+#include "math/vecutils.h"
 
 struct Vec3Object
 {

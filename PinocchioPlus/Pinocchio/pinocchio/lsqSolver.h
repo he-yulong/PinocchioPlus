@@ -24,7 +24,7 @@
 #include <algorithm>
 #include <assert.h>
 
-#include "mathutils.h"
+#include "math/mathutils.h"
 
 /**
 * Represents a factored spd matrix -- primary intended use is inside LSQSystem

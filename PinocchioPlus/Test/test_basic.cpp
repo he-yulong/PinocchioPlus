@@ -1,7 +1,7 @@
 #include "test_basic.h"
 #include <cassert>
 #include <algorithm>
-#include "Pinocchio/Core.h"
+#include "pinocchio.h"
 
 using namespace std;
 

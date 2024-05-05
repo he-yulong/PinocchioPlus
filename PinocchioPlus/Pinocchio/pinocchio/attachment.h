@@ -21,7 +21,7 @@
 
 #include "mesh.h"
 #include "skeleton.h"
-#include "transform.h"
+#include "math/transform.h"
 
 class VisibilityTester
 {

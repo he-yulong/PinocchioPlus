@@ -1,7 +1,7 @@
 #include "test_mesh.h"
-#include "Pinocchio/mesh.h"
-#include "Pinocchio/intersector.h"
-#include "Pinocchio/quaddisttree.h"
+#include "pinocchio/mesh.h"
+#include "pinocchio/intersector.h"
+#include "pinocchio/quaddisttree.h"
 #include <list>
 
 //ostream *Debugging::outStream = NULL;

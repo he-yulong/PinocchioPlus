@@ -3,7 +3,7 @@
 #include "stdafx.h"
 #include <fstream>
 #include <cmath>
-#include "Pinocchio/Core.h"
+#include "pinocchio.h"
 struct ArgData
 {
 	ArgData() : stopAtMesh(false), stopAfterCircles(false), skelScale(1.), noFit(true),

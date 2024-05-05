@@ -24,7 +24,7 @@ THE SOFTWARE.
 #include <fstream>
 
 #include "processor.h"
-#include "Pinocchio/Core.h"
+#include "pinocchio.h"
 #include "defmesh.h"
 #include "motion.h"
 

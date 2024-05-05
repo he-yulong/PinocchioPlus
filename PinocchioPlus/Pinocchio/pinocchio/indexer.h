@@ -20,7 +20,7 @@
 #define INDEXER_H
 
 #include "hashutils.h"
-#include "vector.h"
+#include "math/vector.h"
 
 template<class Node, int Dim>
 class DumbIndexer

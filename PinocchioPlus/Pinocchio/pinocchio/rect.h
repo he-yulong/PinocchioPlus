@@ -19,7 +19,7 @@
 #ifndef RECT_H_INCLUDED
 #define RECT_H_INCLUDED
 
-#include "vector.h"
+#include "math/vector.h"
 
 namespace _RectPrivate {
 template <int Dim> class RectOp;

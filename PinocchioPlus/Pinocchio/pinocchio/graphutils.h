@@ -20,7 +20,7 @@
 #define GRAPHUTILS_H
 
 #include <queue>
-#include "vector.h"
+#include "math/vector.h"
 
 struct PtGraph
 {

@@ -23,7 +23,7 @@
 #include <functional>
 #include <vector>
 #include <numeric>
-#include "hashutils.h"
+#include "../hashutils.h"
 #include "mathutils.h"
 
 using namespace std;

@@ -22,7 +22,7 @@
 #include <vector>
 #include <list>
 
-#include "vector.h"
+#include "math/vector.h"
 #include "rect.h"
 
 struct MeshVertex

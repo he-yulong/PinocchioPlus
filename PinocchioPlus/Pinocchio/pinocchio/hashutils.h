@@ -19,7 +19,7 @@
 #ifndef HASHUTILS_H
 #define HASHUTILS_H
 
-#include "mathutils.h"
+#include "math/mathutils.h"
 
 #ifndef _WIN32
 // #include <unordered_map>

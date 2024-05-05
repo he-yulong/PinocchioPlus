@@ -16,7 +16,7 @@ project "PinocchioPlusSkin"
 	objdir ("../bin-int/" .. outputdir .. "/%{prj.name}")
 	files { "AttachWeights/**.h", "AttachWeights/**.cpp" }
 	includedirs {
-		"../PinocchioPlus/",
+		"../PinocchioPlus/Pinocchio/",
 	}
 	links { 
 		"PinocchioPlusCore"
@@ -31,7 +31,7 @@ project "PinocchioPlusDemo"
 	files { "Demo/**.h", "Demo/**.cpp" }
 	filter "system:linux"
 		includedirs {
-			"../PinocchioPlus/",
+			"../PinocchioPlus/Pinocchio/",
 		}
 		links { 
 			"PinocchioPlusCore",
@@ -52,7 +52,7 @@ project "PinocchioPlusDemo"
 		}
 	filter "system:windows"
 		includedirs {
-			"../PinocchioPlus/",
+			"../PinocchioPlus/Pinocchio/",
 			"%{IncludeDir.fltk}"
 		}
 		libdirs { 
@@ -79,7 +79,7 @@ project "PinocchioPlusDemoUI"
 	files { "DemoUI/**.h", "DemoUI/**.cpp" }
 	filter "system:linux"
 		includedirs {
-			"../PinocchioPlus/",
+			"../PinocchioPlus/Pinocchio/",
 		}
 		links { 
 			"PinocchioPlusCore",
@@ -100,7 +100,7 @@ project "PinocchioPlusDemoUI"
 		}
 	filter "system:windows"
 		includedirs {
-			"../PinocchioPlus/",
+			"../PinocchioPlus/Pinocchio/",
 			"%{IncludeDir.fltk}"
 		}
 		libdirs { 
@@ -135,14 +135,14 @@ project "PinocchioPlusTest"
 	files { "Test/**.h", "Test/**.cpp" }
 	filter "system:linux"
 		includedirs {
-			"../PinocchioPlus/",
+			"../PinocchioPlus/Pinocchio/",
 		}
 		links { 
 			"PinocchioPlusCore"
 		}
 	filter "system:windows"
 		includedirs {
-			"../PinocchioPlus/",
+			"../PinocchioPlus/Pinocchio/",
 		}
 		links { 
 			"PinocchioPlusCore"

@@ -20,7 +20,7 @@
 #define INTERSECTOR_H
 
 #include "mesh.h"
-#include "vecutils.h"
+#include "math/vecutils.h"
 
 class Intersector {
 public:

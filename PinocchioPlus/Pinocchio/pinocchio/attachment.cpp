@@ -19,7 +19,7 @@
 #include <fstream>
 #include <sstream>
 #include "attachment.h"
-#include "vecutils.h"
+#include "math/vecutils.h"
 #include "lsqSolver.h"
 
 class AttachmentPrivate
