@@ -118,3 +118,26 @@ project "PinocchioPlusDemoUI"
 			"fltk_z.lib",
 			"opengl32.lib"
 		}
+
+project "PinocchioPlusTest"
+	kind "ConsoleApp"
+	language "c++"
+	cppdialect "c++14"
+	staticruntime "Off"
+	targetdir ("../bin/" .. outputdir .. "/%{prj.name}")
+	objdir ("../bin-int/" .. outputdir .. "/%{prj.name}")
+	files { "Test/**.h", "Test/**.cpp" }
+	filter "system:linux"
+		includedirs {
+			"../PinocchioPlus/",
+		}
+		links { 
+			"PinocchioPlusCore"
+		}
+	filter "system:windows"
+		includedirs {
+			"../PinocchioPlus/",
+		}
+		links { 
+			"PinocchioPlusCore"
+		}
