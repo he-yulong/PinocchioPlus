@@ -24,15 +24,15 @@
 // defined with this macro as being exported.
 #ifdef _WIN32
 #define PINOCCHIO_API
-//#ifdef PINOCCHIO_EXPORTS
-//#define PINOCCHIO_API __declspec(dllexport)
-//#else //PINOCCHIO_EXPORTS
-//#ifdef PINOCCHIO_STATIC
-//#define PINOCCHIO_API
-//#else //PINOCCHIO_STATIC
-//#define PINOCCHIO_API __declspec(dllimport)
-//#endif //PINOCCHIO_STATIC
-//#endif //PINOCCHIO_EXPORTS
-//#else //_WIN32
-//#define PINOCCHIO_API
+// #ifdef PINOCCHIO_EXPORTS
+// #define PINOCCHIO_API __declspec(dllexport)
+// #else //PINOCCHIO_EXPORTS
+// #ifdef PINOCCHIO_STATIC
+// #define PINOCCHIO_API
+// #else //PINOCCHIO_STATIC
+// #define PINOCCHIO_API __declspec(dllimport)
+// #endif //PINOCCHIO_STATIC
+// #endif //PINOCCHIO_EXPORTS
+#else //_WIN32
+#define PINOCCHIO_API
 #endif //_WIN32
