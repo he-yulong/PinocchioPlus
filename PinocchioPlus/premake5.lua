@@ -8,13 +8,19 @@
 	files { "Pinocchio/**.h", "Pinocchio/**.cpp", "./premake5.lua", "../premake5.lua" }
 	defines { "PINOCCHIO_STATIC" }
 project "PinocchioPlusSkin"
-	kind "StaticLib"
+	kind "ConsoleApp"
 	language "c++"
 	cppdialect "c++14"
 	staticruntime "Off"
 	targetdir ("../bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("../bin-int/" .. outputdir .. "/%{prj.name}")
 	files { "AttachWeights/**.h", "AttachWeights/**.cpp" }
+	includedirs {
+		"../PinocchioPlus/",
+	}
+	links { 
+		"PinocchioPlusCore"
+	}
 project "PinocchioPlusDemo"
 	kind "ConsoleApp"
 	language "c++"

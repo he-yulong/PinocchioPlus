@@ -7,13 +7,19 @@ project "PinocchioJingmaCore"
 	objdir ("../bin-int/" .. outputdir .. "/%{prj.name}")
 	files { "Pinocchio/**.h", "Pinocchio/**.cpp", "./premake5.lua", "../premake5.lua" }
 project "PinocchioJingmaSkin"
-	kind "StaticLib"
+	kind "ConsoleApp"
 	language "c++"
 	cppdialect "c++14"
 	staticruntime "Off"
 	targetdir ("../bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("../bin-int/" .. outputdir .. "/%{prj.name}")
 	files { "AttachWeights/**.h", "AttachWeights/**.cpp" }
+	includedirs {
+		"../PinocchioPlus/",
+	}
+	links { 
+		"PinocchioPlusCore"
+	}
 project "PinocchioJingmaDemo"
 	kind "ConsoleApp"
 	language "c++"
