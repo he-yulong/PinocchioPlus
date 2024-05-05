@@ -36,26 +36,25 @@ void printUsageAndExit()
 	cout << "              [-meshonly | -mo] [-circlesonly | -co]" << endl;
 	cout << "              [-fit] [-stiffness s]" << endl;
 	cout << "              [-skelOut skelOutFile] [-weightOut weightOutFile]" << endl;
-
 	exit(0);
 }
 
-ArgData processArgs(const vector<string> &args)
+ArgData processArgs(const std::vector<std::string> &args)
 {
-	ArgData out;
-	int cur = 2;
-	int num = args.size();
-	if (num < 2)
+	int arg_num = args.size();
+	if (arg_num < 2)
 		printUsageAndExit();
 
+	ArgData out;
 	out.filename = args[1];
 
-	while (cur < num)
+	int cur = 2;
+	while (cur < arg_num)
 	{
 		string curStr = args[cur++];
 		if (curStr == string("-skel"))
 		{
-			if (cur == num)
+			if (cur == arg_num)
 			{
 				cout << "No skeleton specified; ignoring." << endl;
 				continue;
@@ -76,7 +75,7 @@ ArgData processArgs(const vector<string> &args)
 		}
 		if (curStr == string("-rot"))
 		{
-			if (cur + 3 >= num)
+			if (cur + 3 >= arg_num)
 			{
 				cout << "Too few rotation arguments; exiting." << endl;
 				printUsageAndExit();
@@ -92,7 +91,7 @@ ArgData processArgs(const vector<string> &args)
 		}
 		if (curStr == string("-scale"))
 		{
-			if (cur >= num)
+			if (cur >= arg_num)
 			{
 				cout << "No scale provided; exiting." << endl;
 				printUsageAndExit();
@@ -117,7 +116,7 @@ ArgData processArgs(const vector<string> &args)
 		}
 		if (curStr == string("-stiffness"))
 		{
-			if (cur >= num)
+			if (cur >= arg_num)
 			{
 				cout << "No stiffness provided; exiting." << endl;
 				printUsageAndExit();
@@ -127,7 +126,7 @@ ArgData processArgs(const vector<string> &args)
 		}
 		if (curStr == string("-skelOut"))
 		{
-			if (cur == num)
+			if (cur == arg_num)
 			{
 				cout << "No skeleton output specified; ignoring." << endl;
 				continue;
@@ -138,7 +137,7 @@ ArgData processArgs(const vector<string> &args)
 		}
 		if (curStr == string("-weightOut"))
 		{
-			if (cur == num)
+			if (cur == arg_num)
 			{
 				cout << "No weight output specified; ignoring." << endl;
 				continue;
@@ -156,47 +155,45 @@ ArgData processArgs(const vector<string> &args)
 
 void process(const vector<string> &args)
 {
-	int i;
-	ArgData a = processArgs(args);
+	ArgData argData = processArgs(args);
 
 	Debugging::setOutStream(cout);
 
-	Mesh m(a.filename);
-	if (m.vertices.size() == 0)
+	Mesh mesh(argData.filename);
+	if (mesh.vertices.size() == 0)
 	{
 		cout << "Error reading file.  Aborting." << endl;
 		exit(0);
-		return;
 	}
 
-	for (i = 0; i < (int)m.vertices.size(); ++i)
-		m.vertices[i].pos = a.meshTransform * m.vertices[i].pos;
-	m.normalizeBoundingBox();
-	m.computeVertexNormals();
+	for (int i = 0; i < (int)mesh.vertices.size(); ++i)
+		mesh.vertices[i].pos = argData.meshTransform * mesh.vertices[i].pos;
+	mesh.normalizeBoundingBox();
+	mesh.computeVertexNormals();
 
-	Skeleton given = a.skeleton;
-	given.scale(a.skelScale * 0.7);
+	Skeleton given = argData.skeleton;
+	given.scale(argData.skelScale * 0.7);
 
-	if (a.stopAtMesh)
+	if (argData.stopAtMesh)
 	{ // if early bailout
 		return;
 	}
 
 	PinocchioOutput o;
-	if (!a.noFit)
+	if (!argData.noFit)
 	{ // do everything
-		o = autorig(given, m);
+		o = autorig(given, mesh);
 	}
 	else
 	{ // skip the fitting step--assume the skeleton is already correct for the mesh
-		TreeType *distanceField = constructDistanceField(m);
+		TreeType *distanceField = constructDistanceField(mesh);
 		VisTester<TreeType> *tester = new VisTester<TreeType>(distanceField);
 
-		o.embedding = a.skeleton.fGraph().verts;
-		for (i = 0; i < (int)o.embedding.size(); ++i)
-			o.embedding[i] = m.toAdd + o.embedding[i] * m.scale;
+		o.embedding = argData.skeleton.fGraph().verts;
+		for (int i = 0; i < (int)o.embedding.size(); ++i)
+			o.embedding[i] = mesh.toAdd + o.embedding[i] * mesh.scale;
 
-		o.attachment = new Attachment(m, a.skeleton, o.embedding, tester, a.stiffness);
+		o.attachment = new Attachment(mesh, argData.skeleton, o.embedding, tester, argData.stiffness);
 
 		delete tester;
 		delete distanceField;
@@ -209,17 +206,17 @@ void process(const vector<string> &args)
 	}
 
 	// output skeleton embedding
-	for (i = 0; i < (int)o.embedding.size(); ++i)
-		o.embedding[i] = (o.embedding[i] - m.toAdd) / m.scale;
-	ofstream os(a.skelOutName.c_str());
-	for (i = 0; i < (int)o.embedding.size(); ++i)
+	for (int i = 0; i < (int)o.embedding.size(); ++i)
+		o.embedding[i] = (o.embedding[i] - mesh.toAdd) / mesh.scale;
+	ofstream os(argData.skelOutName.c_str());
+	for (int i = 0; i < (int)o.embedding.size(); ++i)
 	{
-		os << i << " " << o.embedding[i][0] << " " << o.embedding[i][1] << " " << o.embedding[i][2] << " " << a.skeleton.fPrev()[i] << endl;
+		os << i << " " << o.embedding[i][0] << " " << o.embedding[i][1] << " " << o.embedding[i][2] << " " << argData.skeleton.fPrev()[i] << endl;
 	}
 
 	// output attachment
-	std::ofstream astrm(a.weightOutName.c_str());
-	for (i = 0; i < (int)m.vertices.size(); ++i)
+	std::ofstream astrm(argData.weightOutName.c_str());
+	for (int i = 0; i < (int)mesh.vertices.size(); ++i)
 	{
 		Vector<double, -1> v = o.attachment->getWeights(i);
 		for (int j = 0; j < v.size(); ++j)
@@ -235,7 +232,7 @@ void process(const vector<string> &args)
 
 int main(int argc, char **argv)
 {
-	vector<string> args;
+	std::vector<std::string> args;
 	for (int i = 0; i < argc; ++i)
 		args.push_back(argv[i]);
 	process(args);

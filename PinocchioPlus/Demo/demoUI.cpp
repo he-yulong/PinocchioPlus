@@ -27,15 +27,15 @@ THE SOFTWARE.
 
 int main(int argc, char **argv)
 {
-    // MyWindow *window = new MyWindow();
-    MyWindow *window = NULL;
+	// MyWindow *window = new MyWindow();
+	MyWindow *window = NULL;
 
-    vector<string> args;
-    for (int i = 0; i < argc; ++i)
-        args.push_back(argv[i]);
-    process(args, window);
+	vector<string> args;
+	for (int i = 0; i < argc; ++i)
+		args.push_back(argv[i]);
+	process(args, window);
 
-    // window->show();
-    // return Fl::run();
-    return 0;
+	// window->show();
+	// return Fl::run();
+	return 0;
 }

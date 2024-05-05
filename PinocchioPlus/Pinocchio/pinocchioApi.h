@@ -1,19 +1,19 @@
 /*  This file is part of the Pinocchio automatic rigging library.
-    Copyright (C) 2007 Ilya Baran (ibaran@mit.edu)
+	Copyright (C) 2007 Ilya Baran (ibaran@mit.edu)
 
-    This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public
-    License as published by the Free Software Foundation; either
-    version 2.1 of the License, or (at your option) any later version.
+	This library is free software; you can redistribute it and/or
+	modify it under the terms of the GNU Lesser General Public
+	License as published by the Free Software Foundation; either
+	version 2.1 of the License, or (at your option) any later version.
 
-    This library is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.
+	This library is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+	Lesser General Public License for more details.
 
-    You should have received a copy of the GNU Lesser General Public
-    License along with this library; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+	You should have received a copy of the GNU Lesser General Public
+	License along with this library; if not, write to the Free Software
+	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
 #ifndef PINOCCHIOAPI_H
@@ -25,10 +25,10 @@
 
 struct PinocchioOutput
 {
-    PinocchioOutput() : attachment(NULL) {}
+	PinocchioOutput() : attachment(NULL) {}
 
-    vector<Vector3> embedding;
-    Attachment *attachment; //user responsible for deletion
+	vector<Vector3> embedding;
+	Attachment *attachment; //user responsible for deletion
 };
 
 //calls the other functions and does the whole rigging process
@@ -48,11 +48,11 @@ static const double defaultTreeTol = 0.003;
 TreeType PINOCCHIO_API *constructDistanceField(const Mesh &m, double tol = defaultTreeTol);
 
 struct Sphere {
-    Sphere() : radius(0.) {}
-    Sphere(const Vector3 &inC, double inR) : center(inC), radius(inR) {}
+	Sphere() : radius(0.) {}
+	Sphere(const Vector3 &inC, double inR) : center(inC), radius(inR) {}
 
-    Vector3 center;
-    double radius;
+	Vector3 center;
+	double radius;
 };
 
 //samples the distance field to find spheres on the medial surface
@@ -67,19 +67,19 @@ PtGraph PINOCCHIO_API connectSamples(TreeType *distanceField, const vector<Spher
 
 //finds which joints can be embedded into which sphere centers
 vector<vector<int> > PINOCCHIO_API computePossibilities(const PtGraph &graph, const vector<Sphere> &spheres,
-                                                        const Skeleton &skeleton);
+														const Skeleton &skeleton);
 
 //finds discrete embedding
 vector<int> PINOCCHIO_API discreteEmbed(const PtGraph &graph, const vector<Sphere> &spheres,
-                                        const Skeleton &skeleton, const vector<vector<int> > &possibilities);
+										const Skeleton &skeleton, const vector<vector<int> > &possibilities);
 
 //reinserts joints for unreduced skeleton
 vector<Vector3> PINOCCHIO_API splitPaths(const vector<int> &discreteEmbedding, const PtGraph &graph,
-                                         const Skeleton &skeleton);
+										 const Skeleton &skeleton);
 
 //refines embedding
 vector<Vector3> PINOCCHIO_API refineEmbedding(TreeType *distanceField, const vector<Vector3> &medialSurface,
-                                              const vector<Vector3> &initialEmbedding, const Skeleton &skeleton);
+											  const vector<Vector3> &initialEmbedding, const Skeleton &skeleton);
 
 //to compute the attachment, create a new Attachment object
 

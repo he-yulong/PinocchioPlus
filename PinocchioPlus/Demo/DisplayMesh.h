@@ -28,21 +28,21 @@ THE SOFTWARE.
 class DisplayMesh
 {
 public:
-    virtual ~DisplayMesh() {}
+	virtual ~DisplayMesh() {}
 
-    virtual const Mesh &getMesh() = 0;
-    virtual vector<Vector3> getSkel() const { return vector<Vector3>(); }
+	virtual const Mesh &getMesh() = 0;
+	virtual vector<Vector3> getSkel() const { return vector<Vector3>(); }
 };
 
 class StaticDisplayMesh : public DisplayMesh
 {
 public:
-    StaticDisplayMesh(const Mesh &inM) : m(inM) {}
+	StaticDisplayMesh(const Mesh &inM) : m(inM) {}
 
-    virtual const Mesh &getMesh() { return m; }
+	virtual const Mesh &getMesh() { return m; }
 private:
 
-    Mesh m;
+	Mesh m;
 };
 
 #endif //DISPLAYMESH_H
