@@ -1,13 +1,7 @@
 #include "test_basic.h"
-#include "Pinocchio/vector.h"
-#include "Pinocchio/rect.h"
-#include "Pinocchio/multilinear.h"
-#include "Pinocchio/indexer.h"
-#include "Pinocchio/vecutils.h"
-#include "Pinocchio/pointprojector.h"
-#include "Pinocchio/utils.h"
 #include <cassert>
 #include <algorithm>
+#include "Pinocchio/Core.h"
 
 using namespace std;
 
@@ -179,14 +173,14 @@ static void test_grid()
 int test_basic()
 {
 	Debugging::setOutStream(cout);
-	// test_vec();
-	// test_rect2();
-	// test_rec3();
-	// test_comp();
-	// test_lookup();
-	// test_proj();
-	// test_objproj();
-	// test_split();
+	test_vec();
+	test_rect2();
+	test_rec3();
+	test_comp();
+	test_lookup();
+	test_proj();
+	test_objproj();
+	test_split();
 	test_grid();
 	return 0;
 }

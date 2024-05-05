@@ -25,7 +25,6 @@ THE SOFTWARE.
 #include "MyWindow.h"
 #include <FL/gl.h>
 #include <FL/Fl.H>
-#include "Pinocchio/skeleton.h"
 
 static HumanSkeleton human;
 

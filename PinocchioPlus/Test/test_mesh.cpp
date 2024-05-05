@@ -10,7 +10,7 @@ typedef DRootNode<DistData<3>, 3, ArrayIndexer> TreeType; // our distance field 
 typedef typename TreeType::Node DistNode;
 static const double defaultTreeTol = 0.003;
 
-void test_intersect(Mesh &mesh)
+void test_intersect(Mesh& mesh)
 {
 	Intersector mint(mesh, Vector3(1, 0, 0));
 	// Vector3 p(-1, 0.5, 0.5);

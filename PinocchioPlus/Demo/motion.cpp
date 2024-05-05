@@ -21,8 +21,6 @@ THE SOFTWARE.
 */
 
 #include "motion.h"
-#include "../Pinocchio/skeleton.h"
-#include "../Pinocchio/utils.h"
 
 #include <fstream>
 #include <sstream>

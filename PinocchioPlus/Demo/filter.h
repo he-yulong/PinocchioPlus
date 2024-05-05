@@ -23,9 +23,7 @@ THE SOFTWARE.
 #ifndef FILTER_H_INCLUDED
 #define FILTER_H_INCLUDED
 
-#include "../Pinocchio/matrix.h"
-#include "../Pinocchio/vector.h"
-#include "../Pinocchio/transform.h"
+#include "Pinocchio/Core.h"
 
 class MotionFilter
 {

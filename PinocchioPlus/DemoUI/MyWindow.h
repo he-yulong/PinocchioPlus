@@ -23,8 +23,7 @@ THE SOFTWARE.
 #ifndef MYWINDOW_H
 #define MYWINDOW_H
 #include <FL/Fl_Gl_Window.H>
-#include "Pinocchio/mesh.h"
-#include "Pinocchio/transform.h"
+#include "Pinocchio/Core.h"
 #include "DisplayMesh.h"
 
 struct LineSegment

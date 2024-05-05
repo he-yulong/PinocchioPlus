@@ -21,7 +21,6 @@ THE SOFTWARE.
 */
 
 #include "filter.h"
-#include "../Pinocchio/deriv.h"
 
 template<class Real>
 Vectorn<Real> getFeet(const vector<Transform<Real> > &transforms, const vector<Vector3> &joints,

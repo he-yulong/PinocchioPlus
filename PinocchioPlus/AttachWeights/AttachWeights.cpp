@@ -2,12 +2,8 @@
 //
 #include "stdafx.h"
 #include <fstream>
-#include "Pinocchio/skeleton.h"
-#include "Pinocchio/utils.h"
-#include "Pinocchio/debugging.h"
-#include "Pinocchio/attachment.h"
-#include "Pinocchio/pinocchioApi.h"
 #include <cmath>
+#include "Pinocchio/Core.h"
 struct ArgData
 {
 	ArgData() : stopAtMesh(false), stopAfterCircles(false), skelScale(1.), noFit(true),
@@ -18,15 +14,15 @@ struct ArgData
 
 	bool stopAtMesh;
 	bool stopAfterCircles;
-	string filename;
+	std::string filename;
 	Quaternion<> meshTransform;
 	double skelScale;
 	bool noFit;
 	Skeleton skeleton;
-	string skeletonname;
+	std::string skeletonname;
 	double stiffness;
-	string skelOutName;
-	string weightOutName;
+	std::string skelOutName;
+	std::string weightOutName;
 };
 
 void printUsageAndExit()
@@ -51,8 +47,8 @@ ArgData processArgs(const std::vector<std::string> &args)
 	int cur = 2;
 	while (cur < arg_num)
 	{
-		string curStr = args[cur++];
-		if (curStr == string("-skel"))
+		std::string curStr = args[cur++];
+		if (curStr == std::string("-skel"))
 		{
 			if (cur == arg_num)
 			{
@@ -60,20 +56,20 @@ ArgData processArgs(const std::vector<std::string> &args)
 				continue;
 			}
 			curStr = args[cur++];
-			if (curStr == string("human"))
+			if (curStr == std::string("human"))
 				out.skeleton = HumanSkeleton();
-			else if (curStr == string("horse"))
+			else if (curStr == std::string("horse"))
 				out.skeleton = HorseSkeleton();
-			else if (curStr == string("quad"))
+			else if (curStr == std::string("quad"))
 				out.skeleton = QuadSkeleton();
-			else if (curStr == string("centaur"))
+			else if (curStr == std::string("centaur"))
 				out.skeleton = CentaurSkeleton();
 			else
 				out.skeleton = FileSkeleton(curStr);
 			out.skeletonname = curStr;
 			continue;
 		}
-		if (curStr == string("-rot"))
+		if (curStr == std::string("-rot"))
 		{
 			if (cur + 3 >= arg_num)
 			{
@@ -89,7 +85,7 @@ ArgData processArgs(const std::vector<std::string> &args)
 			out.meshTransform = Quaternion<>(Vector3(x, y, z), deg * M_PI / 180.) * out.meshTransform;
 			continue;
 		}
-		if (curStr == string("-scale"))
+		if (curStr == std::string("-scale"))
 		{
 			if (cur >= arg_num)
 			{
@@ -99,22 +95,22 @@ ArgData processArgs(const std::vector<std::string> &args)
 			sscanf(args[cur++].c_str(), "%lf", &out.skelScale);
 			continue;
 		}
-		if (curStr == string("-meshonly") || curStr == string("-mo"))
+		if (curStr == std::string("-meshonly") || curStr == std::string("-mo"))
 		{
 			out.stopAtMesh = true;
 			continue;
 		}
-		if (curStr == string("-circlesonly") || curStr == string("-co"))
+		if (curStr == std::string("-circlesonly") || curStr == std::string("-co"))
 		{
 			out.stopAfterCircles = true;
 			continue;
 		}
-		if (curStr == string("-fit"))
+		if (curStr == std::string("-fit"))
 		{
 			out.noFit = false;
 			continue;
 		}
-		if (curStr == string("-stiffness"))
+		if (curStr == std::string("-stiffness"))
 		{
 			if (cur >= arg_num)
 			{
@@ -124,7 +120,7 @@ ArgData processArgs(const std::vector<std::string> &args)
 			sscanf(args[cur++].c_str(), "%lf", &out.stiffness);
 			continue;
 		}
-		if (curStr == string("-skelOut"))
+		if (curStr == std::string("-skelOut"))
 		{
 			if (cur == arg_num)
 			{
@@ -135,7 +131,7 @@ ArgData processArgs(const std::vector<std::string> &args)
 			out.skelOutName = curStr;
 			continue;
 		}
-		if (curStr == string("-weightOut"))
+		if (curStr == std::string("-weightOut"))
 		{
 			if (cur == arg_num)
 			{
@@ -153,7 +149,7 @@ ArgData processArgs(const std::vector<std::string> &args)
 	return out;
 }
 
-void process(const vector<string> &args)
+void process(const std::vector<std::string> &args)
 {
 	ArgData argData = processArgs(args);
 

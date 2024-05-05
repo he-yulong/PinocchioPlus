@@ -22,24 +22,24 @@
 #include <map>
 #include "graphutils.h"
 
-class PINOCCHIO_API Skeleton {
+class Skeleton {
 public:
 	Skeleton() {}
 	
 	const PtGraph &fGraph() const { return fGraphV; }
-	const vector<int> &fPrev() const { return fPrevV; }
-	const vector<int> &fSym() const { return fSymV; }
+	const std::vector<int> &fPrev() const { return fPrevV; }
+	const std::vector<int> &fSym() const { return fSymV; }
 	
 	const PtGraph &cGraph() const { return cGraphV; }
-	const vector<int> &cPrev() const { return cPrevV; }
-	const vector<int> &cSym() const { return cSymV; }
-	const vector<bool> &cFeet() const { return cFeetV; }
-	const vector<bool> &cFat() const { return cFatV; }
+	const std::vector<int> &cPrev() const { return cPrevV; }
+	const std::vector<int> &cSym() const { return cSymV; }
+	const std::vector<bool> &cFeet() const { return cFeetV; }
+	const std::vector<bool> &cFat() const { return cFatV; }
 	
-	const vector<int> &cfMap() const { return cfMapV; }
-	const vector<int> &fcMap() const { return fcMapV; }
-	const vector<double> &fcFraction() const { return fcFractionV; }
-	const vector<double> &cLength() const { return cLengthV; }
+	const std::vector<int> &cfMap() const { return cfMapV; }
+	const std::vector<int> &fcMap() const { return fcMapV; }
+	const std::vector<double> &fcFraction() const { return fcFractionV; }
+	const std::vector<double> &cLength() const { return cLengthV; }
 
 	int getJointForName(const std::string &name) const { if(jointNames.count(name)) return jointNames.find(name)->second; return -1; }
 	
@@ -49,57 +49,57 @@ protected:
 	void initCompressed();
 	
 	//help for creation
-	map<string, int> jointNames;
-	void makeJoint(const string &name, const Vector3 &pos, const string &previous = string());
-	void makeSymmetric(const string &name1, const string &name2);
-	void setFoot(const string &name);
-	void setFat(const string &name);
+	std::map<std::string, int> jointNames;
+	void makeJoint(const std::string &name, const Vector3 &pos, const std::string &previous = std::string());
+	void makeSymmetric(const std::string &name1, const std::string &name2);
+	void setFoot(const std::string &name);
+	void setFat(const std::string &name);
 	
 private:
 	 //full
 	PtGraph fGraphV;
-	vector<int> fPrevV; //previous vertices
-	vector<int> fSymV; //symmetry
+	std::vector<int> fPrevV; //previous vertices
+	std::vector<int> fSymV; //symmetry
 	
 	//compressed (no degree 2 vertices)
 	PtGraph cGraphV; 
-	vector<int> cPrevV; //previous vertices
-	vector<int> cSymV; //symmetry
-	vector<bool> cFeetV; //whether the vertex should be near the ground
-	vector<bool> cFatV; //whether the vertex should be in a large region
+	std::vector<int> cPrevV; //previous vertices
+	std::vector<int> cSymV; //symmetry
+	std::vector<bool> cFeetV; //whether the vertex should be near the ground
+	std::vector<bool> cFatV; //whether the vertex should be in a large region
 	
-	vector<int> cfMapV; //compressed to full map
-	vector<int> fcMapV; //full to compressed map, -1 when vertex is not in compressed
-	vector<double> fcFractionV; //maps full vertex number to ratio of its prev edge length to total length of
+	std::vector<int> cfMapV; //compressed to full map
+	std::vector<int> fcMapV; //full to compressed map, -1 when vertex is not in compressed
+	std::vector<double> fcFractionV; //maps full vertex number to ratio of its prev edge length to total length of
 								//containing edge in the compressed graph
-	vector<double> cLengthV; //lengths of the compressed bones
+	std::vector<double> cLengthV; //lengths of the compressed bones
 };
 
-class PINOCCHIO_API HumanSkeleton : public Skeleton
+class HumanSkeleton : public Skeleton
 {
 public:
 	HumanSkeleton();
 };
 
-class PINOCCHIO_API QuadSkeleton : public Skeleton
+class QuadSkeleton : public Skeleton
 {
 public:
 	QuadSkeleton();
 };
 
-class PINOCCHIO_API HorseSkeleton : public Skeleton
+class HorseSkeleton : public Skeleton
 {
 public:
 	HorseSkeleton();
 };
 
-class PINOCCHIO_API CentaurSkeleton : public Skeleton
+class CentaurSkeleton : public Skeleton
 {
 public:
 	CentaurSkeleton();
 };
 
-class PINOCCHIO_API FileSkeleton : public Skeleton
+class FileSkeleton : public Skeleton
 {
 public:
 	FileSkeleton(const std::string &filename);

@@ -19,11 +19,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-
 #ifndef MOTION_H
 #define MOTION_H
 
-#include "../Pinocchio/transform.h"
+#include "Pinocchio/Core.h"
 
 class Motion
 {

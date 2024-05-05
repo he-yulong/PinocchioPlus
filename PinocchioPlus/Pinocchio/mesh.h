@@ -43,7 +43,7 @@ struct MeshEdge
 	int twin;
 };
 
-class PINOCCHIO_API Mesh
+class Mesh
 {
 public:
 	Mesh() : scale(1.) {}

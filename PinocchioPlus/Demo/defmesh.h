@@ -23,7 +23,7 @@ THE SOFTWARE.
 #ifndef DEFMESH_H_INCLUDED
 #define DEFMESH_H_INCLUDED
 
-#include "../Pinocchio/attachment.h"
+#include "Pinocchio/Core.h"
 #include "filter.h"
 #include "DisplayMesh.h"
 

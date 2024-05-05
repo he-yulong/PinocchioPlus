@@ -23,7 +23,7 @@ THE SOFTWARE.
 #ifndef DISPLAYMESH_H
 #define DISPLAYMESH_H
 
-#include "../Pinocchio/mesh.h"
+#include "Pinocchio/Core.h"
 
 class DisplayMesh
 {

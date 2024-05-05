@@ -63,7 +63,7 @@ template<class T> VisibilityTester *makeVisibilityTester(const T *tree) { return
 
 class AttachmentPrivate;
 
-class PINOCCHIO_API Attachment
+class Attachment
 {
 public:
 	Attachment() : a(NULL) {}

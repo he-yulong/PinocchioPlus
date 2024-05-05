@@ -24,11 +24,6 @@ THE SOFTWARE.
 #include <fstream>
 
 #include "processor.h"
-#include "../Pinocchio/skeleton.h"
-#include "../Pinocchio/utils.h"
-#include "../Pinocchio/debugging.h"
-#include "../Pinocchio/attachment.h"
-#include "../Pinocchio/pinocchioApi.h"
 #include "defmesh.h"
 #include "motion.h"
 

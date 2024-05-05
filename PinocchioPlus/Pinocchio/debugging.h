@@ -25,7 +25,7 @@ class Debugging
 {
 public:
 	static ostream &out() { return *outStream; }
-	static void PINOCCHIO_API setOutStream(ostream &os) { outStream = &os; }
+	static void setOutStream(ostream &os) { outStream = &os; }
 
 private:
 	static ostream *outStream;

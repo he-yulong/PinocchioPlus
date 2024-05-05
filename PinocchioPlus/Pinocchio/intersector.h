@@ -22,7 +22,7 @@
 #include "mesh.h"
 #include "vecutils.h"
 
-class PINOCCHIO_API Intersector {
+class Intersector {
 public:
 	Intersector() : mesh(NULL) {}
 	Intersector(const Mesh &m, const Vector3 &inDir) : mesh(&m), dir(inDir) { init(); }
