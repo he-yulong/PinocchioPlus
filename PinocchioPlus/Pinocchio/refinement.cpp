@@ -18,7 +18,6 @@
 
 #include "pinocchioApi.h"
 #include "deriv.h"
-#include "debugging.h"
 
 
 struct RP //information for refined embedding
@@ -145,7 +144,7 @@ vector<Vector3> refineEmbedding(TreeType *distanceField, const vector<Vector3> &
 		typedef Deriv<double, 6> DType;
 		typedef Deriv<double, -1> DType1;
 		
-		Debugging::out() << "E = " << computeFineError(fineEmbedding, &rp) << endl;
+		std::cout << "E = " << computeFineError(fineEmbedding, &rp) << std::endl;
 		
 		for(int j = 0; j < 2; ++j) {
 			vector<Vector<DType1, 3> > dMatch(sz);

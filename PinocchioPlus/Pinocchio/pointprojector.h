@@ -25,7 +25,6 @@
 #include "vector.h"
 #include "rect.h"
 #include "vecutils.h"
-#include "debugging.h"
 
 struct Vec3Object
 {
@@ -112,7 +111,7 @@ public:
 				}
 				if (sz > 9995)
 				{ // getting close to our array limit
-					Debugging::out() << "Large todo list, likely to fail" << endl;
+					std::cout << "Large todo list, likely to fail" << std::endl;
 				}
 				continue;
 			}

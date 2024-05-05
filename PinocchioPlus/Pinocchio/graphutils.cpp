@@ -17,9 +17,8 @@
 */
 
 #include "graphutils.h"
-#include "debugging.h"
 
-#define CHECK(pred) { if(!(pred)) { Debugging::out() << "Graph integrity error: " #pred << " in line " << __LINE__ << endl; return false; } }
+#define CHECK(pred) { if(!(pred)) { std::cout << "Graph integrity error: " #pred << " in line " << __LINE__ << std::endl; return false; } }
 
 bool PtGraph::integrityCheck() const
 {

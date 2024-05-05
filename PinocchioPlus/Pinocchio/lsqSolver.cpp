@@ -22,7 +22,6 @@
 #include <set>
 #include <iostream>
 #include "hashutils.h"
-#include "debugging.h"
 
 #ifdef TAUCS //TAUCS
 
@@ -215,11 +214,11 @@ LLTMatrix *SPDMatrix::factor() const
 	out.m.resize(sz);
 	out.diag.resize(sz);
 
-	Debugging::out() << "Factoring size = " << sz << endl;
+	std::cout << "Factoring size = " << sz << std::endl;
 	
 	out.perm = computePerm();
 
-	Debugging::out() << "Perm computed" << endl;
+	std::cout << "Perm computed" << std::endl;
 	
 	//permute matrix according to the permuation
 	vector<vector<pair<int, double> > > pm(sz);

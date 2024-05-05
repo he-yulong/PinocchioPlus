@@ -164,7 +164,6 @@ void process(const vector<string> &args, MyWindow *w)
 	int i;
 	ArgData a = processArgs(args);
 
-	Debugging::setOutStream(cout);
 	std::string data_dir = a.data_dir;
 	cout << "data_dir: " << data_dir << endl;
 	std::string meshname = data_dir + "watertight/" + a.filename + ".obj";

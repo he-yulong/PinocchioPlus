@@ -17,7 +17,6 @@
 */
 
 #include "matrix.h"
-#include "debugging.h"
 
 namespace EigPrivate
 {
@@ -105,7 +104,7 @@ Vectorn<double> getEigensystem(Matrixn<double> m, Matrixn<double> *vectors)
 		if(biggestSoFar < tol)
 			break;
 	}
-	Debugging::out() << iter << endl;
+	std::cout << iter << std::endl;
 
 	Vectorn<double> out(sz);
 	for(i = 0; i < sz; ++i)

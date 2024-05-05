@@ -152,8 +152,6 @@ void process(const vector<string> &args, MyWindow *w)
 	int i;
 	ArgData a = processArgs(args);
 
-	Debugging::setOutStream(cout);
-
 	Mesh m(a.filename);
 	if (m.vertices.size() == 0)
 	{

@@ -17,22 +17,19 @@
 */
 
 #include "pinocchioApi.h"
-#include "debugging.h"
 #include <fstream>
 
-ostream *Debugging::outStream = new ofstream();
-
-PinocchioOutput autorig(const Skeleton &given, const Mesh &m)
+PinocchioOutput autorig(const Skeleton& given, const Mesh& m)
 {
 	int i;
 	PinocchioOutput out;
 
 	Mesh newMesh = prepareMesh(m);
 
-	if(newMesh.vertices.size() == 0)
+	if (newMesh.vertices.size() == 0)
 		return out;
 
-	TreeType *distanceField = constructDistanceField(newMesh);
+	TreeType* distanceField = constructDistanceField(newMesh);
 
 	//discretization
 	vector<Sphere> medialSurface = sampleMedialSurface(distanceField);
@@ -49,7 +46,7 @@ PinocchioOutput autorig(const Skeleton &given, const Mesh &m)
 
 	vector<int> embeddingIndices = discreteEmbed(graph, spheres, given, possibilities);
 
-	if(embeddingIndices.size() == 0) { //failure
+	if (embeddingIndices.size() == 0) { //failure
 		delete distanceField;
 		return out;
 	}
@@ -58,13 +55,13 @@ PinocchioOutput autorig(const Skeleton &given, const Mesh &m)
 
 	//continuous refinement
 	vector<Vector3> medialCenters(medialSurface.size());
-	for(i = 0; i < (int)medialSurface.size(); ++i)
+	for (i = 0; i < (int)medialSurface.size(); ++i)
 		medialCenters[i] = medialSurface[i].center;
 
 	out.embedding = refineEmbedding(distanceField, medialCenters, discreteEmbedding, given);
 
 	//attachment
-	VisTester<TreeType> *tester = new VisTester<TreeType>(distanceField);
+	VisTester<TreeType>* tester = new VisTester<TreeType>(distanceField);
 	out.attachment = new Attachment(newMesh, given, out.embedding, tester);
 
 	//cleanup

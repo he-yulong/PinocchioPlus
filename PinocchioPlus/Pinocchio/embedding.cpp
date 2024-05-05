@@ -17,7 +17,6 @@
 */
 
 #include "pinocchioApi.h"
-#include "debugging.h"
 
 struct FP //information for penalty functions
 {
@@ -91,7 +90,7 @@ vector<vector<int> > computePossibilities(const PtGraph &graph, const vector<Sph
 	for(i = 0; i < (int)graph.verts.size(); ++i)
 		if(spheres[i].radius >= cutoff)
 			fatVerts.push_back(i);
-	Debugging::out() << "Extrem, fat verts " << limbVerts.size() << " " << fatVerts.size() << endl;
+	std::cout << "Extrem, fat verts " << limbVerts.size() << " " << fatVerts.size() << std::endl;
 	
 	for(i = 0; i < (int)out.size(); ++i) {
 		bool limb = (skeleton.cGraph().edges[i].size() == 1);
@@ -142,7 +141,7 @@ vector<int> discreteEmbed(const PtGraph &graph, const vector<Sphere> &spheres,
 
 	int toMatch = skeleton.cGraph().verts.size();
 	
-	Debugging::out() << "Matching!" << endl;
+	std::cout << "Matching!" << std::endl;
 	
 	priority_queue<PartialMatch> todo;
 	
@@ -161,12 +160,12 @@ vector<int> discreteEmbed(const PtGraph &graph, const vector<Sphere> &spheres,
 		if(curSz > maxSz) {
 			maxSz = curSz;
 			if(maxSz > 3)
-				Debugging::out() << "Reached " << todo.size() << endl;
+				std::cout << "Reached " << todo.size() << std::endl;
 		}
 		
 		if(idx == toMatch) {
 			output = cur;
-			Debugging::out() << "Found: residual = " << cur.penalty << endl;
+			std::cout << "Found: residual = " << cur.penalty << std::endl;
 			break;
 		}
 		
@@ -176,7 +175,7 @@ vector<int> discreteEmbed(const PtGraph &graph, const vector<Sphere> &spheres,
 			double extraPenalty = computePenalty(penaltyFunctions, cur, candidate);
 
 			if(extraPenalty < 0)
-				Debugging::out() << "ERR = " << extraPenalty << endl;
+				std::cout << "ERR = " << extraPenalty << std::endl;
 			if(cur.penalty + extraPenalty < 1.) {
 				PartialMatch next = cur;
 				next.match.push_back(candidate);
@@ -213,7 +212,7 @@ vector<int> discreteEmbed(const PtGraph &graph, const vector<Sphere> &spheres,
 	
 	if(output.match.size() == 0)
 	{
-		Debugging::out() << "No Match" << endl;
+		std::cout << "No Match" << std::endl;
 	}
 
 	for(i = 0; i < (int)penaltyFunctions.size(); ++i)

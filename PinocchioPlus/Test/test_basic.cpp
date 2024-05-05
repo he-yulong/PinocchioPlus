@@ -172,7 +172,6 @@ static void test_grid()
 
 int test_basic()
 {
-	Debugging::setOutStream(cout);
 	test_vec();
 	test_rect2();
 	test_rec3();

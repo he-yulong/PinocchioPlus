@@ -1,7 +1,6 @@
 #include "test_mesh.h"
 #include "Pinocchio/mesh.h"
 #include "Pinocchio/intersector.h"
-#include "Pinocchio/debugging.h"
 #include "Pinocchio/quaddisttree.h"
 #include <list>
 
@@ -119,7 +118,6 @@ void sdf(TreeType *root)
 
 int MeshTest(int argc, char *argv[])
 {
-	Debugging::setOutStream(cout);
 	Mesh mesh(argv[1]);
 	TreeType *root = constructDistanceField(mesh);
 	// bfs(root);

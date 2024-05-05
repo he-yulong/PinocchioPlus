@@ -153,8 +153,6 @@ void process(const std::vector<std::string> &args)
 {
 	ArgData argData = processArgs(args);
 
-	Debugging::setOutStream(cout);
-
 	Mesh mesh(argData.filename);
 	if (mesh.vertices.size() == 0)
 	{
