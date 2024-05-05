@@ -7,6 +7,9 @@
 	objdir ("../bin-int/" .. outputdir .. "/%{prj.name}")
 	files { "Pinocchio/**.h", "Pinocchio/**.cpp", "./premake5.lua", "../premake5.lua" }
 	defines { "PINOCCHIO_STATIC" }
+	includedirs {
+		"vendor/spdlog-1.14.1/include/",
+	}
 project "PinocchioPlusSkin"
 	kind "ConsoleApp"
 	language "c++"
@@ -16,7 +19,7 @@ project "PinocchioPlusSkin"
 	objdir ("../bin-int/" .. outputdir .. "/%{prj.name}")
 	files { "AttachWeights/**.h", "AttachWeights/**.cpp" }
 	includedirs {
-		"../PinocchioPlus/Pinocchio/",
+		"Pinocchio/",
 	}
 	links { 
 		"PinocchioPlusCore"
@@ -52,7 +55,7 @@ project "PinocchioPlusDemo"
 		}
 	filter "system:windows"
 		includedirs {
-			"../PinocchioPlus/Pinocchio/",
+			"Pinocchio/",
 			"%{IncludeDir.fltk}"
 		}
 		libdirs { 
@@ -79,7 +82,7 @@ project "PinocchioPlusDemoUI"
 	files { "DemoUI/**.h", "DemoUI/**.cpp" }
 	filter "system:linux"
 		includedirs {
-			"../PinocchioPlus/Pinocchio/",
+			"Pinocchio/",
 		}
 		links { 
 			"PinocchioPlusCore",
@@ -100,7 +103,7 @@ project "PinocchioPlusDemoUI"
 		}
 	filter "system:windows"
 		includedirs {
-			"../PinocchioPlus/Pinocchio/",
+			"Pinocchio/",
 			"%{IncludeDir.fltk}"
 		}
 		libdirs { 
@@ -135,14 +138,14 @@ project "PinocchioPlusTest"
 	files { "Test/**.h", "Test/**.cpp" }
 	filter "system:linux"
 		includedirs {
-			"../PinocchioPlus/Pinocchio/",
+			"Pinocchio/",
 		}
 		links { 
 			"PinocchioPlusCore"
 		}
 	filter "system:windows"
 		includedirs {
-			"../PinocchioPlus/Pinocchio/",
+			"Pinocchio/",
 		}
 		links { 
 			"PinocchioPlusCore"

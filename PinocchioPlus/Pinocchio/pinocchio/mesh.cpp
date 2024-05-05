@@ -24,6 +24,7 @@
 #include <map>
 #include <set>
 #include <algorithm>
+#include "tools/Log.h"
 
 Mesh::Mesh(const string &file)
 	: scale(1.)
@@ -39,15 +40,14 @@ Mesh::Mesh(const string &file)
 
 	if (!obj.is_open())
 	{
-		std::cout << "Error opening file " << file << std::endl;
+		PP_CORE_ERROR("Error opening file {}", file);
 		return;
 	}
-
-	std::cout << "Reading " << file << std::endl;
+	PP_CORE_INFO("Reading {}", file);
 
 	if (file.length() < 4)
 	{
-		std::cout << "I don't know what kind of file it is" << std::endl;
+		PP_CORE_ERROR("I don't know what kind of file it is.");
 		return;
 	}
 
@@ -63,7 +63,7 @@ Mesh::Mesh(const string &file)
 		readStl(obj);
 	else
 	{
-		std::cout << "I don't know what kind of file it is" << std::endl;
+		PP_CORE_ERROR("I don't know what kind of file it is.");
 		return;
 	}
 
@@ -77,7 +77,7 @@ Mesh::Mesh(const string &file)
 	{ // make sure all vertex indices are valid
 		if (edges[i].vertex < 0 || edges[i].vertex >= verts)
 		{
-			std::cout << "Error: invalid vertex index " << edges[i].vertex << std::endl;
+			PP_CORE_ERROR("Error: invalid vertex index {}", edges[i].vertex);
 			OUT;
 		}
 	}
@@ -87,9 +87,9 @@ Mesh::Mesh(const string &file)
 	computeTopology();
 
 	if (integrityCheck())
-		std::cout << "Successfully read " << file << ": " << vertices.size() << " vertices, " << edges.size() << " edges" << std::endl;
+		PP_CORE_INFO("Successfully read {}: {} vertices, {} edges.", file, vertices.size(), edges.size());
 	else
-		std::cout << "Somehow read " << file << ": " << vertices.size() << " vertices, " << edges.size() << " edges" << std::endl;
+		PP_CORE_WARN("Somehow read {}: {} vertices, {} edges.", file, vertices.size(), edges.size());
 
 	computeVertexNormals();
 }
