@@ -45,3 +45,4 @@ project-files/
 !data/bad/**.obj
 !data/legacy/**.obj
 !data/mixamo/**.obj
+/PinocchioPlus/build
