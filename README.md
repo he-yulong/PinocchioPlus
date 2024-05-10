@@ -12,13 +12,35 @@ This repository is conducting a research on the paper "Automatic Rigging and ani
 
 #### cmake
 
+PinocchioJingma and PinocchioPlus are seperated projects.
+
 ```
-# PinocchioJingma build directory
+# In the PinocchioJingma directory
+mkdir build
+cd build
 cmake ..
 make
 ```
 
+```
+# In the PinocchioPlus directory
+mkdir build
+cd build
+cmake ..
+make
+```
+
+Example:
+
+```
+./PinocchioPlusDemoUI ../../data/FinalBaseMesh.obj -motion ../../data/legacy/walk.txt
+```
+
+Targets will be in the build directory.
+
 #### premake5
+
+In premake5, PinocchioJingma and PinocchioPlus are in the same workspace.
 
 ```
 # root directory
@@ -29,11 +51,14 @@ make
 
 Then you can check out the `bin` directory.
 
-
 Example:
 
 ```
-./PinocchioJingmaDemoUI ../../../obj_files/2982_remesh.obj -motion ../../../PinocchioJingma/data/walk.txt
+./PinocchioJingmaDemoUI ../../../data/FinalBaseMesh.obj -motion ../../../data/legacy/walk.txt
+```
+
+```
+./PinocchioPlusDemoUI ../../../data/FinalBaseMesh.obj -motion ../../../data/legacy/walk.txt
 ```
 
 ### 1.2 Windows (Visual Studio 2022)
@@ -53,7 +78,7 @@ All dependencies should be included.
 Example:
 
 ```
-./PinocchioJingmaDemoUI ../obj_files/2982_remesh.obj -motion ../data/legacy/walk.txt
+./PinocchioPlusDemoUI ../../../data/FinalBaseMesh.obj -motion ../../../data/legacy/walk.txt
 ```
 
 ## 2 Useful References
