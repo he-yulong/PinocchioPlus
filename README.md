@@ -10,7 +10,7 @@ This repository is conducting a research on the paper "Automatic Rigging and ani
 - `sudo apt-get install libfltk1.3-dev`
 - `sudo apt-get install libxrender-dev libxcursor-dev libxft-dev libfontconfig-dev libxinerama-dev`
 
-#### cmake
+#### 1.1.1 Option 1: cmake
 
 PinocchioJingma and PinocchioPlus are seperated projects.
 
@@ -38,7 +38,7 @@ Example:
 
 Targets will be in the build directory.
 
-#### premake5
+#### 1.1.2 Option 2: premake5
 
 In premake5, PinocchioJingma and PinocchioPlus are in the same workspace.
 
@@ -67,6 +67,7 @@ NOTE:
 
 - Currently Windows compatibility only works for `PinocchioPlus***`.
 - **There will be runtime error in debug mode**, which might be fixed up in the future.
+- Only use premake5 to generate project files.
 
 click `generate-vs2022.bat`, then open up `PinocchioPlus.sln` in `project-files`.
 
