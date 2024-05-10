@@ -22,6 +22,7 @@
 #include <set>
 #include <iostream>
 #include "hashutils.h"
+#include "tools/Log.h"
 
 #ifdef TAUCS //TAUCS
 
@@ -30,6 +31,7 @@
 extern "C" {
 #include "taucs.h"
 }
+
 
 vector<int> SPDMatrix::computePerm() const
 {
@@ -218,8 +220,9 @@ LLTMatrix *SPDMatrix::factor() const
 	
 	out.perm = computePerm();
 
-	std::cout << "Perm computed" << std::endl;
-	
+	//PP_CORE_INFO("Perm computed");
+	pp::Log::GetCoreLogger()->info("Perm computed");
+
 	//permute matrix according to the permuation
 	vector<vector<pair<int, double> > > pm(sz);
 	for(i = 0; i < sz; ++i) {

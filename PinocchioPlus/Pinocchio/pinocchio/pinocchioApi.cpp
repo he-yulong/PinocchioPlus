@@ -18,6 +18,7 @@
 
 #include "pinocchioApi.h"
 #include <fstream>
+#include "tools/Log.h"
 
 PinocchioOutput autorig(const Skeleton& given, const Mesh& m)
 {
@@ -43,8 +44,11 @@ PinocchioOutput autorig(const Skeleton& given, const Mesh& m)
 
 	//constraints can be set by respecifying possibilities for skeleton joints:
 	//to constrain joint i to sphere j, use: possiblities[i] = vector<int>(1, j);
-
+	// TODO: optimize discreteEmbed
+	PP_CORE_DEBUG("discreteEmbed before");
 	vector<int> embeddingIndices = discreteEmbed(graph, spheres, given, possibilities);
+	PP_CORE_DEBUG("discreteEmbed end");
+
 
 	if (embeddingIndices.size() == 0) { //failure
 		delete distanceField;
@@ -58,11 +62,18 @@ PinocchioOutput autorig(const Skeleton& given, const Mesh& m)
 	for (i = 0; i < (int)medialSurface.size(); ++i)
 		medialCenters[i] = medialSurface[i].center;
 
+	PP_CORE_DEBUG("refineEmbedding before");
 	out.embedding = refineEmbedding(distanceField, medialCenters, discreteEmbedding, given);
+	PP_CORE_DEBUG("refineEmbedding end");
 
 	//attachment
+	PP_CORE_DEBUG("new VisTester before");
 	VisTester<TreeType>* tester = new VisTester<TreeType>(distanceField);
+	PP_CORE_DEBUG("new VisTester end");
+
+	PP_CORE_DEBUG("new Attachment before");
 	out.attachment = new Attachment(newMesh, given, out.embedding, tester);
+	PP_CORE_DEBUG("new Attachment end");
 
 	//cleanup
 	delete tester;

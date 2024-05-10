@@ -17,6 +17,7 @@
 */
 
 #include "pinocchioApi.h"
+#include "tools/Log.h"
 
 struct FP //information for penalty functions
 {
