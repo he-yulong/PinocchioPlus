@@ -145,7 +145,7 @@ void Mesh::computeVertexNormals()
 void Mesh::normalizeBoundingBox()
 {
 	int i;
-	vector<Vector3> positions;
+	std::vector<Vector3> positions;
 	for (i = 0; i < (int)vertices.size(); ++i)
 	{
 		positions.push_back(vertices[i].pos);
@@ -699,7 +699,7 @@ bool Mesh::isConnected() const
 	{                                                                                              \
 		if (!(pred))                                                                               \
 		{                                                                                          \
-			std::cout << "Mesh integrity error: " #pred << " in line " << __LINE__ << std::endl; \
+			PP_CORE_ERROR("Mesh integrity error: {} in line {}", #pred, __LINE__);                 \
 			return false;                                                                          \
 		}                                                                                          \
 	}

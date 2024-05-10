@@ -150,3 +150,54 @@ project "PinocchioPlusTest"
 		links { 
 			"PinocchioPlusCore"
 		}
+		
+project "PinocchioPlusExperiment"
+	kind "ConsoleApp"
+	language "c++"
+	cppdialect "c++14"
+	staticruntime "Off"
+	targetdir ("../bin/" .. outputdir .. "/%{prj.name}")
+	objdir ("../bin-int/" .. outputdir .. "/%{prj.name}")
+	files { "Experiment/**.h", "Experiment/**.cpp" }
+	filter "system:linux"
+		includedirs {
+			"Pinocchio/",
+			"vendor/spdlog-1.14.1/include/",
+		}
+		links { 
+			"PinocchioPlusCore",
+			"fltk",
+			"fltk_gl",
+			"GL",
+			"GLU",
+			"Xrender",
+			"Xcursor",
+			"Xfixes",
+			"Xft",
+			"fontconfig",
+			"Xinerama",
+			"pthread",
+			"dl",
+			"m",
+			"X11",
+		}
+	filter "system:windows"
+		includedirs {
+			"Pinocchio/",
+			"vendor/spdlog-1.14.1/include/",
+			"%{IncludeDir.fltk}"
+		}
+		libdirs { 
+			"%{LibDir.fltk}",
+		}
+		links { 
+			"PinocchioPlusCore",
+			"fltk.lib",
+			"fltk_forms.lib",
+			"fltk_gl.lib",
+			"fltk_images.lib",
+			"fltk_jpeg.lib",
+			"fltk_png.lib",
+			"fltk_z.lib",
+			"opengl32.lib"
+		}
