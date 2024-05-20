@@ -169,7 +169,7 @@ void process(const vector<string> &args, MyWindow *w)
 	given.scale(a.skelScale * 0.7);
 
 	if (a.stopAtMesh)
-	{ // if early bailout
+	{	// if early bailout
 		w->addMesh(new StaticDisplayMesh(m));
 		return;
 	}

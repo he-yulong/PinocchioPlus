@@ -22,12 +22,10 @@
 
 void Skeleton::initCompressed()
 {
-	int i;
-
 	fcMapV.resize(fPrevV.size(), -1);
 	fcFractionV.resize(fPrevV.size(), -1.);
 	
-	for(i = 0; i < (int)fPrevV.size(); ++i) {
+	for(int i = 0; i < (int)fPrevV.size(); ++i) {
 		// Make sure to always include the root in the compressed skel!
 		if(fGraphV.edges[i].size() == 2 && i != 0)
 			continue;
@@ -41,7 +39,7 @@ void Skeleton::initCompressed()
 	cFeetV = vector<bool>(cPrevV.size(), false);
 	cFatV = vector<bool>(cPrevV.size(), false);
 	
-	for(i = 0; i < (int)cfMapV.size(); ++i) {
+	for(int i = 0; i < (int)cfMapV.size(); ++i) {
 		cGraphV.verts.push_back(fGraphV.verts[cfMapV[i]]);
 		
 		//symmetry--TODO: need to make sure all unreduced bones in chain
@@ -59,7 +57,7 @@ void Skeleton::initCompressed()
 	}
 	
 	//graph edges
-	for(i = 1; i < (int)cPrevV.size(); ++i) {
+	for(int i = 1; i < (int)cPrevV.size(); ++i) {
 		cGraphV.edges[i].push_back(cPrevV[i]);
 		cGraphV.edges[cPrevV[i]].push_back(i);
 	}
@@ -67,7 +65,7 @@ void Skeleton::initCompressed()
 	cLengthV.resize(cPrevV.size(), 0.);
 
 	//lengths/fraction computation
-	for(i = 1; i < (int)cPrevV.size(); ++i) {
+	for(int i = 1; i < (int)cPrevV.size(); ++i) {
 		int cur = cfMapV[i];
 #ifdef PP_WINDOWS
 		std::unordered_map<int, double> lengths;
@@ -92,10 +90,9 @@ void Skeleton::initCompressed()
 
 void Skeleton::scale(double factor)
 {
-	int i;
-	for(i = 0; i < (int)fGraphV.verts.size(); ++i)
+	for(int i = 0; i < (int)fGraphV.verts.size(); ++i)
 		fGraphV.verts[i] *= factor;
-	for(i = 0; i < (int)cGraphV.verts.size(); ++i) {
+	for(int i = 0; i < (int)cGraphV.verts.size(); ++i) {
 		cGraphV.verts[i] *= factor;
 		cLengthV[i] *= factor;
 	}

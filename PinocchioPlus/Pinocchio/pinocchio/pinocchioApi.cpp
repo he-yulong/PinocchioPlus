@@ -20,33 +20,48 @@
 #include <fstream>
 #include "tools/Log.h"
 
-PinocchioOutput autorig(const Skeleton& given, const Mesh& m)
+PinocchioOutput autorig(const Skeleton& given, const Mesh& mesh)
 {
-	int i;
 	PinocchioOutput out;
-
-	Mesh newMesh = prepareMesh(m);
+	PP_CORE_DEBUG("prepareMesh start.");
+	Mesh newMesh = prepareMesh(mesh);
+	PP_CORE_DEBUG("prepareMesh end.");
 
 	if (newMesh.vertices.size() == 0)
+	{
+		PP_CORE_WARN("Encountering a problem when doing prepareMesh!");
 		return out;
+	}
 
+	PP_CORE_DEBUG("constructDistanceField start.");
 	TreeType* distanceField = constructDistanceField(newMesh);
+	PP_CORE_DEBUG("constructDistanceField end.");
 
 	//discretization
-	vector<Sphere> medialSurface = sampleMedialSurface(distanceField);
+	PP_CORE_DEBUG("sampleMedialSurface start.");
+	std::vector<Sphere> medialSurface = sampleMedialSurface(distanceField);
+	PP_CORE_DEBUG("After sampleMedialSurface, the medialSurface's size: {}", medialSurface.size());
+	PP_CORE_DEBUG("sampleMedialSurface end.");
 
-	vector<Sphere> spheres = packSpheres(medialSurface);
+	PP_CORE_DEBUG("packSpheres start.");
+	std::vector<Sphere> spheres = packSpheres(medialSurface);
+	PP_CORE_DEBUG("After packSpheres, the sphere's size: {}", spheres.size());
+	PP_CORE_DEBUG("packSpheres end.");
 
+	PP_CORE_DEBUG("connectSamples start");
 	PtGraph graph = connectSamples(distanceField, spheres);
+	PP_CORE_DEBUG("connectSamples end");
 
 	//discrete embedding
-	vector<vector<int> > possibilities = computePossibilities(graph, spheres, given);
+	PP_CORE_DEBUG("computePossibilities start");
+	std::vector<std::vector<int>> possibilities = computePossibilities(graph, spheres, given);
+	PP_CORE_DEBUG("computePossibilities end");
 
 	//constraints can be set by respecifying possibilities for skeleton joints:
 	//to constrain joint i to sphere j, use: possiblities[i] = vector<int>(1, j);
 	// TODO: optimize discreteEmbed
 	PP_CORE_DEBUG("discreteEmbed before");
-	vector<int> embeddingIndices = discreteEmbed(graph, spheres, given, possibilities);
+	std::vector<int> embeddingIndices = discreteEmbed(graph, spheres, given, possibilities);
 	PP_CORE_DEBUG("discreteEmbed end");
 
 
@@ -55,11 +70,11 @@ PinocchioOutput autorig(const Skeleton& given, const Mesh& m)
 		return out;
 	}
 
-	vector<Vector3> discreteEmbedding = splitPaths(embeddingIndices, graph, given);
+	std::vector<Vector3> discreteEmbedding = splitPaths(embeddingIndices, graph, given);
 
 	//continuous refinement
-	vector<Vector3> medialCenters(medialSurface.size());
-	for (i = 0; i < (int)medialSurface.size(); ++i)
+	std::vector<Vector3> medialCenters(medialSurface.size());
+	for (int i = 0; i < medialSurface.size(); ++i)
 		medialCenters[i] = medialSurface[i].center;
 
 	PP_CORE_DEBUG("refineEmbedding before");

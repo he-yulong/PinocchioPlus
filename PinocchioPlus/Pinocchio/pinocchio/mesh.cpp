@@ -29,7 +29,6 @@
 Mesh::Mesh(const string &file)
 	: scale(1.)
 {
-	int i;
 #define OUT               \
 	{                     \
 		vertices.clear(); \
@@ -50,7 +49,7 @@ Mesh::Mesh(const string &file)
 		PP_CORE_ERROR("I don't know what kind of file it is.");
 		return;
 	}
-
+	// Check the format
 	if (string(file.end() - 4, file.end()) == string(".obj"))
 		readObj(obj);
 	else if (string(file.end() - 4, file.end()) == string(".ply"))
@@ -73,6 +72,7 @@ Mesh::Mesh(const string &file)
 	if (verts == 0)
 		return;
 
+	int i;
 	for (i = 0; i < (int)edges.size(); ++i)
 	{ // make sure all vertex indices are valid
 		if (edges[i].vertex < 0 || edges[i].vertex >= verts)
@@ -94,14 +94,14 @@ Mesh::Mesh(const string &file)
 	computeVertexNormals();
 }
 
+// computes the topological structure of the mesh using the half-edge data structur
 void Mesh::computeTopology()
 {
-	int i;
-	for (i = 0; i < (int)edges.size(); ++i)
+	for (int i = 0; i < (int)edges.size(); ++i)
 		edges[i].prev = (i - i % 3) + (i + 2) % 3;
 
-	vector<map<int, int>> halfEdgeMap(vertices.size());
-	for (i = 0; i < (int)edges.size(); ++i)
+	std::vector<std::map<int, int>> halfEdgeMap(vertices.size());
+	for (int i = 0; i < (int)edges.size(); ++i)
 	{
 		int v1 = edges[i].vertex;
 		int v2 = edges[edges[i].prev].vertex;
@@ -123,12 +123,12 @@ void Mesh::computeTopology()
 	}
 }
 
+// Computes vertex normals based on the geometry of neighboring faces,
 void Mesh::computeVertexNormals()
 {
-	int i;
-	for (i = 0; i < (int)vertices.size(); ++i)
+	for (int i = 0; i < (int)vertices.size(); ++i)
 		vertices[i].normal = Vector3();
-	for (i = 0; i < (int)edges.size(); i += 3)
+	for (int i = 0; i < (int)edges.size(); i += 3)
 	{
 		int i1 = edges[i].vertex;
 		int i2 = edges[i + 1].vertex;
@@ -138,22 +138,24 @@ void Mesh::computeVertexNormals()
 		vertices[i2].normal += normal;
 		vertices[i3].normal += normal;
 	}
-	for (i = 0; i < (int)vertices.size(); ++i)
+	for (int i = 0; i < (int)vertices.size(); ++i)
 		vertices[i].normal = vertices[i].normal.normalize();
 }
 
+// rescales and translates the mesh vertices to fit within a normalized bounding box 
+// centered at (0.5, 0.5, 0.5) 
+// and with a maximum size of 0.9 in each dimension.
 void Mesh::normalizeBoundingBox()
 {
-	int i;
 	std::vector<Vector3> positions;
-	for (i = 0; i < (int)vertices.size(); ++i)
+	for (int i = 0; i < vertices.size(); ++i)
 	{
 		positions.push_back(vertices[i].pos);
 	}
 	Rect3 boundingBox = Rect3(positions.begin(), positions.end());
 	double cscale = .9 / boundingBox.getSize().accumulate(ident<double>(), maximum<double>());
 	Vector3 ctoAdd = Vector3(0.5, 0.5, 0.5) - boundingBox.getCenter() * cscale;
-	for (i = 0; i < (int)vertices.size(); ++i)
+	for (int i = 0; i < vertices.size(); ++i)
 	{
 		vertices[i].pos = ctoAdd + vertices[i].pos * cscale;
 	}
@@ -180,11 +182,11 @@ struct MFace
 	int v[3];
 };
 
+// TODO: can be optimized (yulong)
 void Mesh::fixDupFaces()
 {
-	int i;
-	map<MFace, int> faces;
-	for (i = 0; i < (int)edges.size(); i += 3)
+	std::map<MFace, int> faces;
+	for (int i = 0; i < (int)edges.size(); i += 3)
 	{
 		MFace current(edges[i].vertex, edges[i + 1].vertex, edges[i + 2].vertex);
 
@@ -221,7 +223,7 @@ void Mesh::fixDupFaces()
 
 	// scan for unreferenced vertices and get rid of them
 	set<int> referencedVerts;
-	for (i = 0; i < (int)edges.size(); ++i)
+	for (int i = 0; i < (int)edges.size(); ++i)
 	{
 		if (edges[i].vertex < 0 || edges[i].vertex >= (int)vertices.size())
 			continue;
@@ -230,19 +232,20 @@ void Mesh::fixDupFaces()
 
 	vector<int> newIdxs(vertices.size(), -1);
 	int curIdx = 0;
-	for (i = 0; i < (int)vertices.size(); ++i)
+	for (int i = 0; i < (int)vertices.size(); ++i)
 	{
 		if (referencedVerts.count(i))
 			newIdxs[i] = curIdx++;
 	}
 
-	for (i = 0; i < (int)edges.size(); ++i)
+	for (int i = 0; i < (int)edges.size(); ++i)
 	{
 		if (edges[i].vertex < 0 || edges[i].vertex >= (int)vertices.size())
 			continue;
 		edges[i].vertex = newIdxs[edges[i].vertex];
 	}
-	for (i = 0; i < (int)vertices.size(); ++i)
+	
+	for (int i = 0; i < (int)vertices.size(); ++i)
 	{
 		if (newIdxs[i] > 0)
 			vertices[newIdxs[i]] = vertices[i];
@@ -252,31 +255,20 @@ void Mesh::fixDupFaces()
 
 void Mesh::readObj(istream &strm)
 {
-	int i;
 	int lineNum = 0;
 	while (!strm.eof())
 	{
 		++lineNum;
-
-		vector<string> words = readWords(strm);
-
-		if (words.size() == 0)
-			continue;
-		if (words[0][0] == '#') // comment
-			continue;
-
-		if (words[0].size() != 1) // unknown line
+		std::vector<std::string> words = readWords(strm);
+		if (words.size() == 0 ||
+			words[0][0] == '#' ||  // comment
+			words[0].size() != 1)  // unknown line
 			continue;
 
 		// deal with the line based on the first word
-		if (words[0][0] == 'v')
+		if (words[0][0] == 'v')  // v x1 x2 x3
 		{
-			// if (words.size() != 4)
-			// {
-			//     std::cout << "Error on line " << lineNum << endl;
-			//     OUT;
-			// }
-
+			// Adding a vertex
 			double x, y, z;
 			sscanf(words[1].c_str(), "%lf", &x);
 			sscanf(words[2].c_str(), "%lf", &y);
@@ -286,27 +278,30 @@ void Mesh::readObj(istream &strm)
 			vertices.back().pos = Vector3(x, y, z);
 		}
 
-		if (words[0][0] == 'f')
+		if (words[0][0] == 'f')  // f 1//1 2//2 3//3 4//4
 		{
 			if (words.size() < 4 || words.size() > 15)
 			{
-				std::cout << "Error on line " << lineNum << std::endl;
+				PP_CORE_ERROR("Error on line {}", lineNum);
 				OUT;
 			}
 
 			int a[16];
-			for (i = 0; i < (int)words.size() - 1; ++i)
+			for (int i = 0; i < (int)words.size() - 1; ++i)
 				sscanf(words[i + 1].c_str(), "%d", a + i);
 
-			// swap(a[1], a[2]); //TODO:remove
+			// swap(a[1], a[2]); //TODO: remove
 
-			for (int j = 2; j < (int)words.size() - 1; ++j)
+			for (int j = 2; j < (int)words.size() - 1; ++j)  // j = 2
 			{
+				// triangulation
+				//if (j == 3) PP_CORE_DEBUG(">=3");
 				int first = edges.size();
 				edges.resize(edges.size() + 3);
 				edges[first].vertex = a[0] - 1;
 				edges[first + 1].vertex = a[j - 1] - 1;
 				edges[first + 2].vertex = a[j] - 1;
+				//PP_CORE_DEBUG("v1: {} v2: {} v3: {}", edges[first].vertex, edges[first+1].vertex, edges[first+2].vertex);
 			}
 		}
 

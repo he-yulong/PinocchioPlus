@@ -111,13 +111,6 @@ project "PinocchioPlusDemoUI"
 		}
 		links { 
 			"PinocchioPlusCore",
-			--"fltk.lib",
-			--"fltkforms.lib",
-			--"fltkgl.lib",
-			--"fltkimages.lib",
-			--"fltkjpeg.lib",
-			--"fltkpng.lib",
-			--"zlib.lib",
 			"fltk.lib",
 			"fltk_forms.lib",
 			"fltk_gl.lib",
@@ -158,11 +151,16 @@ project "PinocchioPlusExperiment"
 	staticruntime "Off"
 	targetdir ("../bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("../bin-int/" .. outputdir .. "/%{prj.name}")
-	files { "Experiment/**.h", "Experiment/**.cpp" }
+	files { 
+		"Experiment/**.h", 
+		"Experiment/**.cpp", 
+		"../experiment.json",
+	}
 	filter "system:linux"
 		includedirs {
 			"Pinocchio/",
 			"vendor/spdlog-1.14.1/include/",
+			"../vendor/json/include",
 		}
 		links { 
 			"PinocchioPlusCore",
@@ -185,7 +183,8 @@ project "PinocchioPlusExperiment"
 		includedirs {
 			"Pinocchio/",
 			"vendor/spdlog-1.14.1/include/",
-			"%{IncludeDir.fltk}"
+			"%{IncludeDir.fltk}",
+			"../vendor/json/include",
 		}
 		libdirs { 
 			"%{LibDir.fltk}",

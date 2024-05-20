@@ -55,22 +55,20 @@ public:
 	double weight;
 };
 
-vector<vector<int> > computePossibilities(const PtGraph &graph, const vector<Sphere> &spheres,
+std::vector<std::vector<int> > computePossibilities(const PtGraph &graph, const std::vector<Sphere> &spheres,
 										  const Skeleton &skeleton)
 {
-	int i, j;
-
-	vector<vector<int> > out(skeleton.cGraph().verts.size());
-	vector<int> allVerts, limbVerts, fatVerts;
-	for(i = 0; i < (int)graph.verts.size(); ++i) {
+	std::vector<std::vector<int> > out(skeleton.cGraph().verts.size());
+	std::vector<int> allVerts, limbVerts, fatVerts;
+	for(int i = 0; i < graph.verts.size(); ++i) {
 		allVerts.push_back(i);
-		const vector<int> &edg = graph.edges[i];
+		const std::vector<int> &edg = graph.edges[i];
 		double rad = spheres[i].radius;
 		Vector3 cur = graph.verts[i];
-		for(j = 0; j < (int)edg.size(); ++j) {
+		for(int j = 0; j < edg.size(); ++j) {
 			Vector3 e1 = graph.verts[edg[j]];
 			int k;
-			for(k = 0; k < (int)edg.size(); ++k) {
+			for(k = 0; k < edg.size(); ++k) {
 				if(rad > 2. * spheres[edg[k]].radius)
 					continue;
 				Vector3 e2 = graph.verts[edg[k]];
@@ -83,26 +81,23 @@ vector<vector<int> > computePossibilities(const PtGraph &graph, const vector<Sph
 			break;
 		}
 	}
-	vector<double> rads;
-	for(i = 0; i < (int)graph.verts.size(); ++i)
+	std::vector<double> rads;
+	for(int i = 0; i < (int)graph.verts.size(); ++i)
 		rads.push_back(spheres[i].radius);
 	sort(rads.begin(), rads.end());
 	double cutoff = (int)rads.size() < 50 ? 0. : rads[rads.size() - 50];
-	for(i = 0; i < (int)graph.verts.size(); ++i)
+	for(int i = 0; i < (int)graph.verts.size(); ++i)
 		if(spheres[i].radius >= cutoff)
 			fatVerts.push_back(i);
 	std::cout << "Extrem, fat verts " << limbVerts.size() << " " << fatVerts.size() << std::endl;
 	
-	for(i = 0; i < (int)out.size(); ++i) {
+	for(int i = 0; i < (int)out.size(); ++i) {
 		bool limb = (skeleton.cGraph().edges[i].size() == 1);
 		bool fat = skeleton.cFat()[i];
 
-		if(fat)
-			out[i] = fatVerts;
-		else if(limb)
-			out[i] = limbVerts;
-		else
-			out[i] = allVerts;
+		if(fat) out[i] = fatVerts;
+		else if(limb) out[i] = limbVerts;
+		else out[i] = allVerts;
 	}
 
 	return out;
@@ -128,95 +123,93 @@ double computePenalty(const vector<PenaltyFunction *> &penaltyFunctions,
 	return out;
 }
 
-vector<int> discreteEmbed(const PtGraph &graph, const vector<Sphere> &spheres,
-						  const Skeleton &skeleton, const vector<vector<int> > &possibilities)
+std::vector<int> discreteEmbed(const PtGraph& graph, const vector<Sphere>& spheres,
+	const Skeleton& skeleton, const vector<vector<int> >& possibilities)
 {
-	int i, j;
 	FP fp(graph, skeleton, spheres);
 
 	fp.footBase = 1.;
-	for(i = 0; i < (int)graph.verts.size(); ++i)
-		fp.footBase = min(fp.footBase, graph.verts[i][1]);
+	for (int i = 0; i < (int)graph.verts.size(); ++i)
+		fp.footBase = std::min(fp.footBase, graph.verts[i][1]);
 
-	vector<PenaltyFunction *> penaltyFunctions = getPenaltyFunctions(&fp);
+	std::vector<PenaltyFunction*> penaltyFunctions = getPenaltyFunctions(&fp);
 
 	int toMatch = skeleton.cGraph().verts.size();
-	
-	std::cout << "Matching!" << std::endl;
-	
+
+	PP_CORE_DEBUG("Matching!");
+
 	priority_queue<PartialMatch> todo;
-	
+
 	PartialMatch output(graph.verts.size());
 	todo.push(output);
-	
+
 	int maxSz = 0;
-	
-	while(!todo.empty()) {
+
+	while (!todo.empty()) {
 		PartialMatch cur = todo.top();
 		todo.pop();
-		
+
 		int idx = cur.match.size();
-		
-		int curSz = (int)log((double)todo.size());
-		if(curSz > maxSz) {
+
+		int curSz = log((double)todo.size());
+		if (curSz > maxSz) {
 			maxSz = curSz;
-			if(maxSz > 3)
+			if (maxSz > 3)
 				std::cout << "Reached " << todo.size() << std::endl;
 		}
-		
-		if(idx == toMatch) {
+
+		if (idx == toMatch) {
 			output = cur;
 			std::cout << "Found: residual = " << cur.penalty << std::endl;
 			break;
 		}
-		
-		for(i = 0; i < (int)possibilities[idx].size(); ++i) {
+
+		for (int i = 0; i < possibilities[idx].size(); ++i) {
 			int candidate = possibilities[idx][i];
-			int k;
 			double extraPenalty = computePenalty(penaltyFunctions, cur, candidate);
 
-			if(extraPenalty < 0)
+			if (extraPenalty < 0)
 				std::cout << "ERR = " << extraPenalty << std::endl;
-			if(cur.penalty + extraPenalty < 1.) {
+			if (cur.penalty + extraPenalty < 1.) {
 				PartialMatch next = cur;
 				next.match.push_back(candidate);
 				next.penalty += extraPenalty;
 				next.heuristic = next.penalty;
-				
+
 				//compute taken vertices and edges
-				if(idx > 0) {
+				if (idx > 0) {
 					vector<int> path = fp.paths.path(candidate, next.match[skeleton.cPrev()[idx]]);
-					for(j = 0; j < (int)path.size(); ++j)
+					for (int j = 0; j < path.size(); ++j)
 						next.vTaken[path[j]] = true;
 				}
 
 				//compute heuristic
-				for(j = idx + 1; j < toMatch; ++j) {
-					if(skeleton.cPrev()[j] > idx)
+				for (int j = idx + 1; j < toMatch; ++j) {
+					if (skeleton.cPrev()[j] > idx)
 						continue;
 					double minP = 1e37;
-					for(k = 0; k < (int)possibilities[j].size(); ++k) {
+					for (int k = 0; k < (int)possibilities[j].size(); ++k) {
 						minP = min(minP, computePenalty(penaltyFunctions, next, possibilities[j][k], j));
 					}
 					next.heuristic += minP;
-					if(next.heuristic > 1.)
+					if (next.heuristic > 1.)
 						break;
 				}
 
-				if(next.heuristic > 1.)
+				if (next.heuristic > 1.)
 					continue;
 
 				todo.push(next);
 			}
 		}
 	}
-	
-	if(output.match.size() == 0)
+
+	if (output.match.size() == 0)
 	{
 		std::cout << "No Match" << std::endl;
 	}
 
-	for(i = 0; i < (int)penaltyFunctions.size(); ++i)
+	for (int i = 0; i < penaltyFunctions.size(); ++i)
 		delete penaltyFunctions[i];
 
 	return output.match;

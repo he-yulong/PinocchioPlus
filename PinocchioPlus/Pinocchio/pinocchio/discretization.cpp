@@ -19,13 +19,14 @@
 #include "pinocchioApi.h"
 #include "deriv.h"
 #include <list>
+#include "tools/Log.h"
 
 // fits mesh inside unit cube, makes sure there's exactly one connected component
-Mesh prepareMesh(const Mesh &m)
+Mesh prepareMesh(const Mesh &mesh)
 {
-	Mesh out = m;
+	Mesh out = mesh;
 
-	if (!m.isConnected())
+	if (!mesh.isConnected())
 	{
 		std::cout << "Bad mesh: should be a single connected component" << std::endl;
 		return Mesh();
@@ -37,26 +38,26 @@ Mesh prepareMesh(const Mesh &m)
 	return out;
 }
 
-// constructs a distance field on an octree--user responsible for deleting output
-TreeType *constructDistanceField(const Mesh &m, double tol)
+// constructs a distance field on an octree based on a given mesh--user responsible for deleting output
+TreeType *constructDistanceField(const Mesh &mesh, double tol)
 {
-	vector<Tri3Object> triobjvec;
-	for (int i = 0; i < (int)m.edges.size(); i += 3)
+	std::vector<Tri3Object> triobjvec;
+	for (int i = 0; i < mesh.edges.size(); i += 3)
 	{
-		Vector3 v1 = m.vertices[m.edges[i].vertex].pos;
-		Vector3 v2 = m.vertices[m.edges[i + 1].vertex].pos;
-		Vector3 v3 = m.vertices[m.edges[i + 2].vertex].pos;
+		Vector3 v1 = mesh.vertices[mesh.edges[i].vertex].pos;
+		Vector3 v2 = mesh.vertices[mesh.edges[i + 1].vertex].pos;
+		Vector3 v3 = mesh.vertices[mesh.edges[i + 2].vertex].pos;
 
 		triobjvec.push_back(Tri3Object(v1, v2, v3));
 	}
 
 	ObjectProjector<3, Tri3Object> proj(triobjvec);
 
-	TreeType *out = OctTreeMaker<TreeType>().make(proj, m, tol);
+	TreeType *out = OctTreeMaker<TreeType>().make(proj, mesh, tol);
 
-	std::cout << "Done fullSplit " << out->countNodes() << " " << out->maxLevel() << std::endl;
+	PP_CORE_INFO("Done fullSplit {} {}", out->countNodes(), out->maxLevel());
 
-	return out;
+	return out;  // Finally, it returns the pointer to the constructed octree.
 }
 
 double getMinDot(TreeType *distanceField, const Vector3 &c, double step)
@@ -99,23 +100,25 @@ bool sphereComp(const Sphere &s1, const Sphere &s2) { return s1.radius > s2.radi
 
 // samples the distance field to find spheres on the medial surface
 // output is sorted by radius in decreasing order
-vector<Sphere> sampleMedialSurface(TreeType *distanceField, double tol)
+std::vector<Sphere> sampleMedialSurface(TreeType *distanceField, double tol)
 {
-	int i;
-	vector<Sphere> out;
+	std::vector<Sphere> out;
 
-	list<OctTreeNode *> queue;
+	/*
+	It uses a breadth-first search (BFS) approach to traverse the octree.
+	It processes nodes level by level, starting from the root.
+	*/
+	list<OctTreeNode*> queue;
 	queue.push_back(distanceField);
 	int iter = 0;
 	while (!queue.empty())
 	{
 		OctTreeNode *cur = queue.front();
 		queue.pop_front();
-		// std::cout << "iter: " << iter << endl;
 		iter++;
 		if (cur->getChild(0))
 		{
-			for (i = 0; i < 8; ++i)
+			for (int i = 0; i < 8; ++i)
 			{
 				queue.push_back(cur->getChild(i));
 			}
@@ -123,14 +126,22 @@ vector<Sphere> sampleMedialSurface(TreeType *distanceField, double tol)
 		}
 
 		// we are at octree leaf
+		// If the current node is a leaf (no children), it calculates
+		// The bounding box (Rect3 r) of the node.
+		// The radius (rad) of the bounding box.
+		// The center (c) of the bounding box.
+		// It then calls getMinDot to determine if the current point is near the medial surface. 
+		// If dot > 0., it continues to the next iteration.
 		Rect3 r = cur->getRect();
 		double rad = r.getSize().length() / 2.;
 		Vector3 c = r.getCenter();
 		double dot = getMinDot(distanceField, c, rad);
-		if (dot > 0.)
-			continue;
+		if (dot > 0.) continue;
+			
 
 		// we are likely near medial surface
+		// Sampling Points on the Medial Surface
+		// If the node is likely near the medial surface, it samples points on the faces of the bounding box
 		double step = tol;
 		double x, y;
 		vector<Vector3> pts;
@@ -139,30 +150,26 @@ vector<Sphere> sampleMedialSurface(TreeType *distanceField, double tol)
 			for (y = 0; y <= sz; y += step)
 			{
 				pts.push_back(r.getLo() + Vector3(x, y, 0));
-				if (y != 0.)
-					pts.push_back(r.getLo() + Vector3(x, 0, y));
-				if (x != 0. && y != 0.)
-					pts.push_back(r.getLo() + Vector3(0, x, y));
+				if (y != 0.) pts.push_back(r.getLo() + Vector3(x, 0, y));
+				if (x != 0. && y != 0.) pts.push_back(r.getLo() + Vector3(0, x, y));
 			}
 
 		// pts now contains a grid on 3 of the octree cell faces (that's enough)
 		// cout << "pts.size():" << pts.size() << endl;
-		for (i = 0; i < (int)pts.size(); ++i)
+		for (int i = 0; i < pts.size(); ++i)
 		{
 			Vector3 &p = pts[i];
 			double dist = -distanceField->locate(p)->evaluate(p);
-			if (dist <= 2. * step)
-				continue; // we want to be well inside
+			if (dist <= 2. * step) continue; // we want to be well inside
 			double dot = getMinDot(distanceField, p, step * 0.001);
-			if (dot > 0.0)
-				continue;
+			if (dot > 0.0) continue;
 			out.push_back(Sphere(p, dist));
 		}
 	}
+	
+	PP_CORE_INFO("Medial axis points = {}", out.size());
 
-	std::cout << "Medial axis points = " << out.size() << std::endl;
-
-	sort(out.begin(), out.end(), sphereComp);
+	std::sort(out.begin(), out.end(), sphereComp);
 
 	return out;
 }
@@ -206,17 +213,16 @@ double getMaxDist(TreeType *distanceField, const Vector3 &v1, const Vector3 &v2,
 }
 
 // constructs graph on packed sphere centers
-PtGraph connectSamples(TreeType *distanceField, const vector<Sphere> &spheres)
+PtGraph connectSamples(TreeType *distanceField, const std::vector<Sphere> &spheres)
 {
-	int i, j;
 	PtGraph out;
 
-	for (i = 0; i < (int)spheres.size(); ++i)
+	for (int i = 0; i < spheres.size(); ++i)
 		out.verts.push_back(spheres[i].center);
 	out.edges.resize(spheres.size());
 
-	for (i = 1; i < (int)spheres.size(); ++i)
-		for (j = 0; j < i; ++j)
+	for (int i = 1; i < spheres.size(); ++i)
+		for (int j = 0; j < i; ++j)
 		{
 			int k;
 			Vector3 ctr = (spheres[i].center + spheres[j].center) * 0.5;
@@ -229,13 +235,11 @@ PtGraph connectSamples(TreeType *distanceField, const vector<Sphere> &spheres)
 			}
 			for (k = 0; k < (int)spheres.size(); ++k)
 			{
-				if (k == i || k == j)
-					continue;
+				if (k == i || k == j) continue;
 				if ((spheres[k].center - ctr).lengthsq() < radsq)
 					break; // gabriel graph condition violation
 			}
-			if (k < (int)spheres.size())
-				continue;
+			if (k < (int)spheres.size()) continue;
 			// every point on edge should be at least this far in:
 			double maxAllowed = -.5 * min(spheres[i].radius, spheres[j].radius);
 			if (getMaxDist(distanceField, spheres[i].center, spheres[j].center, maxAllowed) < maxAllowed)

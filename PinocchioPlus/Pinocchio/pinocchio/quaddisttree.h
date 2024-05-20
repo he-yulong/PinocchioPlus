@@ -64,9 +64,8 @@ public:
 	template <class Eval, template <typename Node, int IDim> class Indexer>
 	void fullSplit(const Eval &eval, double tol, DRootNode<DistData<Dim>, Dim, Indexer> *rootNode, int level = 0, bool cropOutside = false)
 	{
-		int i;
 		// for each corner of the node's rect
-		// calcuate rect_corner's distance to surface
+		// calculate rect_corner's distance to surface
 		const Rect<double, Dim> &rect = node->getRect();
 		node->initFunc(eval, rect);
 
@@ -131,11 +130,10 @@ public:
 			}
 		}
 
-		if (!doSplit)
-			return;
+		if (!doSplit) return;
 
 		rootNode->split(node);
-		for (i = 0; i < NodeType::numChildren; ++i)
+		for (int i = 0; i < NodeType::numChildren; ++i)
 		{
 			eval.setRect(Rect<double, Dim>(rect.getCorner(i)) | Rect<double, Dim>(rect.getCenter()));
 			node->getChild(i)->fullSplit(eval, tol, rootNode, level + 1, nextCropOutside);

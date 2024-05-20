@@ -1,0 +1,8 @@
+{
+  "skeleton": "human",
+  "mesh-only": false,
+  "circles-only": false,
+  "no-fit": false,
+  "obj": "../data/FinalBaseMesh.obj",
+  "motion": "../data/legacy/walk.txt"
+}
