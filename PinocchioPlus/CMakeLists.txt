@@ -35,3 +35,6 @@ target_include_directories(Demo
     "${PROJECT_SOURCE_DIR}/Pinocchio"
     "${PROJECT_SOURCE_DIR}/vendor/spdlog-1.14.1/include/"
  )
+ # ========================================================================
+find_package(Threads REQUIRED)
+target_link_libraries(AttachWeights PRIVATE Threads::Threads)

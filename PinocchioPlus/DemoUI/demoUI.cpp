@@ -25,16 +25,21 @@ THE SOFTWARE.
 #include "MyWindow.h"
 #include "DisplayMesh.h"
 #include "processor.h"
+#include <ctime>
 
 int main(int argc, char **argv)
 {
+	std::clock_t start = std::clock();
 	MyWindow *window = new MyWindow();
 
 	vector<string> args;
 	for (int i = 0; i < argc; ++i)
 		args.push_back(argv[i]);
 	process(args, window);
-
+	    // Record the end time
+    std::clock_t end = std::clock();
+    double duration = double(end - start) / CLOCKS_PER_SEC;
+    std::cout << "Execution time: " << duration << " seconds" << std::endl;
 	window->show();
 
 	return Fl::run();

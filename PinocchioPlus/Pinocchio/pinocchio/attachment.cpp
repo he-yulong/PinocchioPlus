@@ -215,30 +215,30 @@ public:
 		return;
 	}
 
-	Mesh deform(const Mesh &mesh, const vector<Transform<>> &transforms) const
-	{
-		Mesh out = mesh;
-		int i, nv = mesh.vertices.size();
 
-		if (mesh.vertices.size() != weights.size())
-			return out; // error
+// 假设 Vector3 和 Transform 都是 Eigen 类型，或者类似的支持并行的库
+Mesh deform(const Mesh &mesh, const std::vector<Transform<>> &transforms) const {
+    Mesh out = mesh;
+    int nv = mesh.vertices.size();
 
-		for (i = 0; i < nv; ++i)
-		{
-			Vector3 newPos;
-			int j;
-			for (j = 0; j < (int)nzweights[i].size(); ++j)
-			{
-				newPos += ((transforms[nzweights[i][j].first] * out.vertices[i].pos) * nzweights[i][j].second);
-			}
-			out.vertices[i].pos = newPos;
-		}
+    if (mesh.vertices.size() != weights.size())
+        return out; // error
 
-		out.computeVertexNormals();
+    #pragma omp parallel for
+    for (int i = 0; i < nv; ++i) {
+        Vector3 newPos(0.0, 0.0, 0.0); // 手动初始化为零向量; // 假设 Vector3 支持初始化为零
+        for (const auto& weightPair : nzweights[i]) {
+            int boneIndex = weightPair.first;
+            double weight = weightPair.second;
+            newPos += (transforms[boneIndex] * mesh.vertices[i].pos) * weight;
+        }
+        out.vertices[i].pos = newPos;
+    }
 
-		return out;
-	}
+    out.computeVertexNormals();
 
+    return out;
+}
 	Vector<double, -1> getWeights(int i) const { return weights[i]; }
 
 	AttachmentPrivate *clone() const
