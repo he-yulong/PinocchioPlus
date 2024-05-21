@@ -23,6 +23,10 @@
 #include "skeleton.h"
 #include "math/transform.h"
 
+enum class SkinningMethod {
+	LBS, DQS
+};
+
 class VisibilityTester
 {
 public:
@@ -66,7 +70,7 @@ class AttachmentPrivate;
 class Attachment
 {
 public:
-	Attachment() : a(NULL) {}
+	Attachment() : m_AttachmentCore(NULL) {}
 	Attachment(const Attachment &);
 	Attachment(const Mesh &mesh, const Skeleton &skeleton, const vector<Vector3> &match, const VisibilityTester *tester, double initialHeatWeight=1.);
 	virtual ~Attachment();
@@ -74,7 +78,8 @@ public:
 	Mesh deform(const Mesh &mesh, const vector<Transform<> > &transforms) const;
 	Vector<double, -1> getWeights(int i) const;
 private:
-	AttachmentPrivate *a;
+	AttachmentPrivate *m_AttachmentCore;
+	SkinningMethod m_SkinningMethod = SkinningMethod::LBS;
 };
 
 #endif

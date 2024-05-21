@@ -66,6 +66,7 @@ PinocchioOutput autorig(const Skeleton& given, const Mesh& mesh)
 
 
 	if (embeddingIndices.size() == 0) { //failure
+		PP_CORE_ERROR("discreteEmbed failure!");
 		delete distanceField;
 		return out;
 	}

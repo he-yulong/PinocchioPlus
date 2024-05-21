@@ -287,12 +287,12 @@ void Mesh::readObj(istream &strm)
 			}
 
 			int a[16];
-			for (int i = 0; i < (int)words.size() - 1; ++i)
+			for (int i = 0; i < words.size() - 1; ++i)
 				sscanf(words[i + 1].c_str(), "%d", a + i);
 
 			// swap(a[1], a[2]); //TODO: remove
 
-			for (int j = 2; j < (int)words.size() - 1; ++j)  // j = 2
+			for (int j = 2; j < words.size() - 1; ++j)  // j = 2
 			{
 				// triangulation
 				//if (j == 3) PP_CORE_DEBUG(">=3");

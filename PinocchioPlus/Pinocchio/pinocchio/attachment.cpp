@@ -21,18 +21,19 @@
 #include "attachment.h"
 #include "math/vecutils.h"
 #include "lsqSolver.h"
+#include "tools/Log.h"
 
 class AttachmentPrivate
 {
 public:
 	AttachmentPrivate() {}
 	virtual ~AttachmentPrivate() {}
-	virtual Mesh deform(const Mesh &mesh, const vector<Transform<>> &transforms) const = 0;
+	virtual Mesh deform(const Mesh& mesh, const vector<Transform<>>& transforms, SkinningMethod method) const = 0;
 	virtual Vector<double, -1> getWeights(int i) const = 0;
-	virtual AttachmentPrivate *clone() const = 0;
+	virtual AttachmentPrivate* clone() const = 0;
 };
 
-bool vectorInCone(const Vector3 &v, const vector<Vector3> &ns)
+bool vectorInCone(const Vector3& v, const vector<Vector3>& ns)
 {
 	int i;
 	Vector3 avg;
@@ -47,8 +48,8 @@ class AttachmentPrivate1 : public AttachmentPrivate
 public:
 	AttachmentPrivate1() {}
 
-	AttachmentPrivate1(const Mesh &mesh, const Skeleton &skeleton, const vector<Vector3> &match, const VisibilityTester *tester,
-					   double initialHeatWeight)
+	AttachmentPrivate1(const Mesh& mesh, const Skeleton& skeleton, const vector<Vector3>& match, const VisibilityTester* tester,
+		double initialHeatWeight)
 	{
 		int i, j;
 		int nv = mesh.vertices.size();
@@ -93,7 +94,7 @@ public:
 			double minDist = 1e37; // cal the distance from vertex_i to each bone
 			for (j = 1; j <= bones; ++j)
 			{
-				const Vector3 &v1 = match[j], &v2 = match[skeleton.fPrev()[j]];
+				const Vector3& v1 = match[j], & v2 = match[skeleton.fPrev()[j]];
 				boneDists[i][j - 1] = sqrt(distsqToSeg(cPos, v1, v2));
 				minDist = min(boneDists[i][j - 1], minDist);
 			}
@@ -104,7 +105,7 @@ public:
 				if (boneDists[i][j - 1] > minDist * 1.0001)
 					continue;
 
-				const Vector3 &v1 = match[j], &v2 = match[skeleton.fPrev()[j]];
+				const Vector3& v1 = match[j], & v2 = match[skeleton.fPrev()[j]];
 				Vector3 p = projToSeg(cPos, v1, v2);                                            // cansee: line segment (cpos-projected cpos on bone) inside the surface
 				boneVis[i][j - 1] = tester->canSee(cPos, p) && vectorInCone(cPos - p, normals); // vector_in_cone: line segment inside the radiance field of vertex_i's one ring
 			}
@@ -124,8 +125,8 @@ public:
 				int nj = (j + 1) % edges[i].size();
 
 				D[i] += ((mesh.vertices[edges[i][j]].pos - mesh.vertices[i].pos) %
-						 (mesh.vertices[edges[i][nj]].pos - mesh.vertices[i].pos))
-							.length();
+					(mesh.vertices[edges[i][nj]].pos - mesh.vertices[i].pos))
+					.length();
 			}
 			D[i] = 1. / (1e-10 + D[i]);
 
@@ -175,7 +176,7 @@ public:
 
 		nzweights.resize(nv);
 		SPDMatrix Am(A);
-		LLTMatrix *Ainv = Am.factor();
+		LLTMatrix* Ainv = Am.factor();
 		if (Ainv == NULL)
 			return;
 
@@ -216,34 +217,42 @@ public:
 	}
 
 
-// 假设 Vector3 和 Transform 都是 Eigen 类型，或者类似的支持并行的库
-Mesh deform(const Mesh &mesh, const std::vector<Transform<>> &transforms) const {
-    Mesh out = mesh;
-    int nv = mesh.vertices.size();
+	// 假设 Vector3 和 Transform 都是 Eigen 类型，或者类似的支持并行的库
+	Mesh deform(const Mesh& mesh, const std::vector<Transform<>>& transforms, SkinningMethod method) const {
+		Mesh out = mesh;
+		int nv = mesh.vertices.size();
+		if (mesh.vertices.size() != weights.size()) return out; // error
+		
+		switch (method)
+		{
+		case SkinningMethod::LBS:
+#pragma omp parallel for
+			for (int i = 0; i < nv; ++i) {
+				Vector3 newPos(0.0, 0.0, 0.0); // initialize newPos to zero vector
+				for (const auto& weightPair : nzweights[i]) {
+					int boneIndex = weightPair.first;
+					double weight = weightPair.second;
+					newPos += (transforms[boneIndex] * mesh.vertices[i].pos) * weight;
+				}
+				out.vertices[i].pos = newPos;
+			}
+			break;
+		case SkinningMethod::DQS:
+			break;
+		default:
+			break;
+		}
 
-    if (mesh.vertices.size() != weights.size())
-        return out; // error
+		out.computeVertexNormals();
 
-    #pragma omp parallel for
-    for (int i = 0; i < nv; ++i) {
-        Vector3 newPos(0.0, 0.0, 0.0); // 手动初始化为零向量; // 假设 Vector3 支持初始化为零
-        for (const auto& weightPair : nzweights[i]) {
-            int boneIndex = weightPair.first;
-            double weight = weightPair.second;
-            newPos += (transforms[boneIndex] * mesh.vertices[i].pos) * weight;
-        }
-        out.vertices[i].pos = newPos;
-    }
+		return out;
+	}
 
-    out.computeVertexNormals();
-
-    return out;
-}
 	Vector<double, -1> getWeights(int i) const { return weights[i]; }
 
-	AttachmentPrivate *clone() const
+	AttachmentPrivate* clone() const
 	{
-		AttachmentPrivate1 *out = new AttachmentPrivate1();
+		AttachmentPrivate1* out = new AttachmentPrivate1();
 		*out = *this;
 		return out;
 	}
@@ -255,24 +264,25 @@ private:
 
 Attachment::~Attachment()
 {
-	if (a)
-		delete a;
+	if (m_AttachmentCore)
+		delete m_AttachmentCore;
 }
 
-Attachment::Attachment(const Attachment &att)
+Attachment::Attachment(const Attachment& att)
 {
-	a = att.a->clone();
+	m_AttachmentCore = att.m_AttachmentCore->clone();
 }
 // vertex_i's weights from all bones
-Vector<double, -1> Attachment::getWeights(int i) const { return a->getWeights(i); }
+Vector<double, -1> Attachment::getWeights(int i) const { return m_AttachmentCore->getWeights(i); }
 
-Mesh Attachment::deform(const Mesh &mesh, const vector<Transform<>> &transforms) const
+// perform in every frame
+Mesh Attachment::deform(const Mesh& mesh, const vector<Transform<>>& transforms) const
 {
-	return a->deform(mesh, transforms);
+	return m_AttachmentCore->deform(mesh, transforms, m_SkinningMethod);
 }
 
-Attachment::Attachment(const Mesh &mesh, const Skeleton &skeleton, const vector<Vector3> &match, const VisibilityTester *tester,
-					   double initialHeatWeight)
+Attachment::Attachment(const Mesh& mesh, const Skeleton& skeleton, const vector<Vector3>& match, const VisibilityTester* tester,
+	double initialHeatWeight)
 {
-	a = new AttachmentPrivate1(mesh, skeleton, match, tester, initialHeatWeight);
+	m_AttachmentCore = new AttachmentPrivate1(mesh, skeleton, match, tester, initialHeatWeight);
 }
