@@ -30,7 +30,13 @@ public:
 	//constructors
 	Quaternion() : r(1.) { } //initialize to identity
 	Quaternion(const Quaternion &q) : r(q.r), v(q.v) {} //copy constructor
-
+	void clear()
+	{
+		r = 0;
+		v[0] = 0;
+		v[1] = 0;
+		v[2] = 0;
+	}
 	template<class R> Quaternion(const Quaternion<R> &q) : r(q.r), v(q.v) {} //convert quaternions of other types
 	//axis angle constructor:
 	template<class R> Quaternion(const Vector<R, 3> &axis, const R &angle) : r(cos(angle * Real(0.5))), v(sin(angle * Real(0.5)) * axis.normalize()) {}

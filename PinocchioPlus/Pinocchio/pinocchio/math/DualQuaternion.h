@@ -108,6 +108,5 @@ template<class Real = double>
 Vector3 transformPoint(const DualQuaternion<Real>& dq, const Vector3& v) {
 	//Quaternion<Real> d = conjugate(dq.real) * (dq.dual * 2.0f);
 	Quaternion<Real> d = (dq.dual * 2.0f) * conjugate(dq.real);
-	Vector3& t = d.v;
-	return dq.real * v + t;
+	return dq.real * v + d.v;
 }

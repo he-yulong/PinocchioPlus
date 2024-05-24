@@ -208,25 +208,27 @@ public:
 			}
 			break;
 		case SkinningMethod::DQS:
-			// Using Dual Quaternions Skinning
-#pragma omp parallel for
-			for (int i = 0; i < nv; ++i) {
+			{
+				// Using Dual Quaternions Skinning
 				DualQuaternion<double> blendedDQ;
-				blendedDQ.real = Quaternion<double>(0, 0, 0, 0); // Initialize to zero quaternion
-				blendedDQ.dual = Quaternion<double>(0, 0, 0, 0); // Initialize to zero quaternion
-				int pivot;
-				for (const auto& weightPair : nzweights[i]) {
-					pivot = nzweights[i][0].first;
-					auto q0 = transformToDualQuat(transforms[pivot]);
-					int boneIndex = weightPair.first;
-					double weight = weightPair.second;
-					DualQuaternion<double> dq = transformToDualQuat(transforms[boneIndex]);
-					if (dot(dq.real, q0.real) < 0.f) weight *= -1.f;
-					blendedDQ = blendedDQ + (dq * weight);
+	#pragma omp parallel for
+				for (int i = 0; i < nv; ++i)
+				{
+					blendedDQ.real.clear();  // Initialize to zero quaternion
+					blendedDQ.dual.clear();  // Initialize to zero quaternion
+					if (nzweights[i].size() == 0) continue;
+					int pivot = nzweights[i][0].first;
+					DualQuaternion<double> q0 = transformToDualQuat(transforms[pivot]);
+					for (const auto& weightPair : nzweights[i]) {
+						int boneIndex = weightPair.first;
+						double weight = weightPair.second;
+						DualQuaternion<double> dq = transformToDualQuat(transforms[boneIndex]);
+						if (dot(dq.real, q0.real) < 0.f) weight *= -1.f;
+						blendedDQ = blendedDQ + (dq * weight);
+					}
+					normalize(blendedDQ); // Ensure the blended dual quaternion is normalized
+					out.vertices[i].pos = transformPoint(blendedDQ, (mesh.vertices[i].pos));
 				}
-				normalize(blendedDQ); // Ensure the blended dual quaternion is normalized
-				Vector3 newPos = transformPoint(blendedDQ, (mesh.vertices[i].pos));
-				out.vertices[i].pos = newPos;
 			}
 			break;
 		default:
