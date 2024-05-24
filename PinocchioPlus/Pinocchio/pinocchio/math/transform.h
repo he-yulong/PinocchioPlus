@@ -62,7 +62,17 @@ public:
 	Quaternion(Real _x, Real _y, Real _z, Real _w) : r(_w), v(_x, _y, _z) {}
 	
 	// quaternion multiplication
-	Quaternion operator*(const Quaternion &q) const { return Quaternion(r * q.r - v * q.v, r * q.v + q.r * v + v % q.v); }
+	Quaternion operator*(const Quaternion& q) const { return Quaternion(r * q.r - v * q.v, r * q.v + q.r * v + v % q.v); }
+	//Quaternion operator*(const Quaternion& q) const {
+	//	auto& Q2 = q;
+	//	auto& Q1 = *this;
+	//	return Quaternion(
+	//		Q2.v[0] * Q1.r + Q2.v[1] * Q1.v[2] - Q2.v[2] * Q1.v[1] + Q2.r * Q1.v[0],
+	//		-Q2.v[0] * Q1.v[2] + Q2.v[1] * Q1.r + Q2.v[2] * Q1.v[0] + Q2.r * Q1.v[1],
+	//		Q2.v[0] * Q1.v[1] - Q2.v[1] * Q1.v[0] + Q2.v[2] * Q1.r + Q2.r * Q1.v[2],
+	//		-Q2.v[0] * Q1.v[0] - Q2.v[1] * Q1.v[1] - Q2.v[2] * Q1.v[2] + Q2.r * Q1.r
+	//	);
+	//}
 	
 	// Scalar multiplication by Yulong He
 	Quaternion operator*(const Real& scalar) const {
@@ -127,6 +137,13 @@ Real dot(const Quaternion<Real>& a, const Quaternion<Real>& b) {
 template<class Real = double>
 Quaternion<Real> conjugate(const Quaternion<Real>& q) {
 	return Quaternion<Real>(q.r, -q.v);
+}
+
+// added by yulong
+template<class Real = double>
+Real len(const Quaternion<Real>& a) {
+	float magSq = dot(a, a);
+	return sqrtf(magSq);
 }
 
 template<class Real = double> class Transform { //T(v) = (rot * v * scale) + trans

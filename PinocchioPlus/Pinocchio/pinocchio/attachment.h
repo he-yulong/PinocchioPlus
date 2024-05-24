@@ -77,9 +77,11 @@ public:
 
 	Mesh deform(const Mesh &mesh, const vector<Transform<> > &transforms) const;
 	Vector<double, -1> getWeights(int i) const;
+	inline void setSkinningMethod(SkinningMethod method) { m_SkinningMethod = method; }  // extended by yulong
+	inline SkinningMethod getSkinningMethod() const { return m_SkinningMethod; }
 private:
 	AttachmentPrivate *m_AttachmentCore;
-	SkinningMethod m_SkinningMethod = SkinningMethod::DQS;
+	SkinningMethod m_SkinningMethod = SkinningMethod::LBS;
 };
 
 #endif

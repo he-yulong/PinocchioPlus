@@ -84,28 +84,30 @@ DualQuaternion<Real> transformToDualQuat(const Transform<Real>& t) {
 	Quaternion<Real> d(t.trans[0], t.trans[1], t.trans[2], 0);
 
 	Quaternion<Real> qr = t.getRot();
-	Quaternion<Real> qd = qr * d * 0.5f;
+	//Quaternion<Real> qd = qr * d * 0.5f;
+	Quaternion<Real> qd = d * qr * 0.5f;
 
 	return DualQuaternion<Real>(qr, qd);
 }
-template<class Real = double>
-Transform<Real> dualQuatToTransform(const DualQuaternion<Real>& dq) {
-	Transform<Real> result;
-
-	result.rotation = dq.real;
-
-	Quaternion<Real> d = conjugate(dq.real) * (dq.dual * 2.0f);
-	result.position = vec3(d.x, d.y, d.z);
-
-	return result;
-}
-template<class Real = double>
-Vector3 transformVector(const DualQuaternion<Real>& dq, const Vector3& v) {
-	return dq.real * v;
-}
+//template<class Real = double>
+//Transform<Real> dualQuatToTransform(const DualQuaternion<Real>& dq) {
+//	Transform<Real> result;
+//
+//	result.rotation = dq.real;
+//
+//	Quaternion<Real> d = conjugate(dq.real) * (dq.dual * 2.0f);
+//	result.position = Vector3(d.v[0], d..v[1], d.v[2]);
+//
+//	return result;
+//}
+//template<class Real = double>
+//Vector3 transformVector(const DualQuaternion<Real>& dq, const Vector3& v) {
+//	return dq.real * v;
+//}
 template<class Real = double>
 Vector3 transformPoint(const DualQuaternion<Real>& dq, const Vector3& v) {
-	Quaternion<Real> d = conjugate(dq.real) * (dq.dual * 2.0f);
-	Vector3 t = d.v;
+	//Quaternion<Real> d = conjugate(dq.real) * (dq.dual * 2.0f);
+	Quaternion<Real> d = (dq.dual * 2.0f) * conjugate(dq.real);
+	Vector3& t = d.v;
 	return dq.real * v + t;
 }

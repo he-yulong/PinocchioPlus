@@ -237,35 +237,25 @@ public:
 			}
 			break;
 		case SkinningMethod::DQS:
-			// TODO: Using Dual Quaternions Skinning
+			// Using Dual Quaternions Skinning
 #pragma omp parallel for
 			for (int i = 0; i < nv; ++i) {
 				DualQuaternion<double> blendedDQ;
 				blendedDQ.real = Quaternion<double>(0, 0, 0, 0); // Initialize to zero quaternion
 				blendedDQ.dual = Quaternion<double>(0, 0, 0, 0); // Initialize to zero quaternion
-
-#ifdef PP_RELEASE
-				Vector3 newPos(0.0, 0.0, 0.0);
+				int pivot;
 				for (const auto& weightPair : nzweights[i]) {
+					pivot = nzweights[i][0].first;
+					auto q0 = transformToDualQuat(transforms[pivot]);
 					int boneIndex = weightPair.first;
 					double weight = weightPair.second;
 					DualQuaternion<double> dq = transformToDualQuat(transforms[boneIndex]);
-					normalize(dq); // Ensure the blended dual quaternion is normalized
-					newPos += transformPoint(dq, mesh.vertices[i].pos) * weight;
-				}
-				out.vertices[i].pos = newPos;
-#else
-				for (const auto& weightPair : nzweights[i]) {
-					int boneIndex = weightPair.first;
-					double weight = weightPair.second;
-					DualQuaternion<double> dq = transformToDualQuat(transforms[boneIndex]);
+					if (dot(dq.real, q0.real) < 0.f) weight *= -1.f;
 					blendedDQ = blendedDQ + (dq * weight);
 				}
 				normalize(blendedDQ); // Ensure the blended dual quaternion is normalized
-				// Transform the vertex position using the blended dual quaternion
-				Vector3 newPos = transformPoint(blendedDQ, mesh.vertices[i].pos);
+				Vector3 newPos = transformPoint(blendedDQ, (mesh.vertices[i].pos));
 				out.vertices[i].pos = newPos;
-#endif // 1
 			}
 			break;
 		default:
@@ -300,6 +290,7 @@ Attachment::~Attachment()
 Attachment::Attachment(const Attachment& att)
 {
 	m_AttachmentCore = att.m_AttachmentCore->clone();
+	m_SkinningMethod = att.getSkinningMethod();
 }
 // vertex_i's weights from all bones
 Vector<double, -1> Attachment::getWeights(int i) const { return m_AttachmentCore->getWeights(i); }

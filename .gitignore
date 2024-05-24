@@ -46,3 +46,4 @@ project-files/
 !data/legacy/**.obj
 !data/mixamo/**.obj
 /PinocchioPlus/build
+/data/legacy/.idea

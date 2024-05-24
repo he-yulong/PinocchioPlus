@@ -39,13 +39,12 @@ Motion::Motion(const string &file) : fixedFrame(-1)
 	readH(strm);
 }
 
-vector<Vector3> computePose(const vector<Vector3> &nums, const int *prev)
+std::vector<Vector3> computePose(const std::vector<Vector3> &nums, const int *prev)
 {
-	int i;
-	vector<Vector3> out;
-	vector<Transform<> > tr;
+	std::vector<Vector3> out;
+	std::vector<Transform<> > tr;
 	
-	for(i = 0; i < (int)nums.size(); i += 2) {
+	for(int i = 0; i < nums.size(); i += 2) {
 		Transform<> cur;
 		if(nums[i].length() > 1e-8)
 			cur = Transform<>(Quaternion<>(nums[i], nums[i].length()), 1., nums[i + 1]);
@@ -58,9 +57,9 @@ vector<Vector3> computePose(const vector<Vector3> &nums, const int *prev)
 		out.push_back(cur * Vector3(0, 0, 0));
 		tr.push_back(cur);
 	}
-	for(i = 0; i < (int)out.size(); ++i)
+	for(int i = 0; i < out.size(); ++i)
 		out[i] = 0.0005 * (/*tr[0].inverse() */ out[i]);
-	for(i = 0; i < (int)out.size(); ++i)
+	for(int i = 0; i < out.size(); ++i)
 		out[i] = Quaternion<>(Vector3(1., 1., 1.), 4. * M_PI / 3.) * out[i];
 	return out;
 }

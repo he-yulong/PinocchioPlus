@@ -26,6 +26,7 @@ THE SOFTWARE.
 #include "processor.h"
 #include "defmesh.h"
 #include "motion.h"
+#include "pinocchio/tools/Log.h"
 
 struct ArgData
 {
@@ -43,6 +44,7 @@ struct ArgData
 	bool noFit;
 	Skeleton skeleton;
 	string skeletonname;
+	SkinningMethod skinning = SkinningMethod::LBS;
 };
 
 void printUsageAndExit()
@@ -140,6 +142,12 @@ ArgData processArgs(const vector<string> &args)
 			out.motionname = args[cur++];
 			continue;
 		}
+		if (curStr == std::string("-dqs")) {
+			// Add skinning option
+			PP_CORE_INFO("Using skinning method DQS.");
+			out.skinning = SkinningMethod::DQS;
+			continue;
+		}
 		cout << "Unrecognized option: " << curStr << endl;
 		printUsageAndExit();
 	}
@@ -175,6 +183,7 @@ void process(const vector<string> &args, MyWindow *w)
 	}
 
 	PinocchioOutput o;
+
 	if (!a.noFit)
 	{ // do everything
 		o = autorig(given, m);
@@ -193,6 +202,8 @@ void process(const vector<string> &args, MyWindow *w)
 		delete tester;
 		delete distanceField;
 	}
+	o.attachment->setSkinningMethod(a.skinning);  // Setting skinning method!
+
 
 	if (o.embedding.size() == 0)
 	{

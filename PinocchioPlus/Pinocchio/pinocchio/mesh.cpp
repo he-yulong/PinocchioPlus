@@ -69,11 +69,9 @@ Mesh::Mesh(const string &file)
 	// reconstruct the rest of the information
 	int verts = vertices.size();
 
-	if (verts == 0)
-		return;
+	if (verts == 0) return;
 
-	int i;
-	for (i = 0; i < (int)edges.size(); ++i)
+	for (int i = 0; i < (int)edges.size(); ++i)
 	{ // make sure all vertex indices are valid
 		if (edges[i].vertex < 0 || edges[i].vertex >= verts)
 		{

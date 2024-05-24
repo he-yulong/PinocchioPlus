@@ -83,6 +83,7 @@ project "PinocchioPlusDemoUI"
 	filter "system:linux"
 		includedirs {
 			"Pinocchio/",
+			"vendor/spdlog-1.14.1/include/",
 		}
 		links { 
 			"PinocchioPlusCore",
@@ -104,7 +105,8 @@ project "PinocchioPlusDemoUI"
 	filter "system:windows"
 		includedirs {
 			"Pinocchio/",
-			"%{IncludeDir.fltk}"
+			"%{IncludeDir.fltk}",
+			"vendor/spdlog-1.14.1/include/"
 		}
 		libdirs { 
 			"%{LibDir.fltk}",

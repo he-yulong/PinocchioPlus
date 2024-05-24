@@ -42,7 +42,7 @@ public:
 
 	void setMotion(Motion *inMotion) { motion = inMotion; }
 	Motion *getMotion() const { return motion; }
-	void updateIfHasMotion() const { if(motion) updateMesh(); }
+	//void updateIfHasMotion() const { if(motion) updateMesh(); }
 
 	vector<Vector3> getSkel() const;
 	const Skeleton &getOrigSkel() const { return origSkel; }
