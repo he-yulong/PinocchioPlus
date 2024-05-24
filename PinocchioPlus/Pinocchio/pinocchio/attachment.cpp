@@ -22,6 +22,7 @@
 #include "math/vecutils.h"
 #include "lsqSolver.h"
 #include "tools/Log.h"
+#include "math/DualQuaternion.h"
 
 class AttachmentPrivate
 {
@@ -216,8 +217,6 @@ public:
 		return;
 	}
 
-
-	// 假设 Vector3 和 Transform 都是 Eigen 类型，或者类似的支持并行的库
 	Mesh deform(const Mesh& mesh, const std::vector<Transform<>>& transforms, SkinningMethod method) const {
 		Mesh out = mesh;
 		int nv = mesh.vertices.size();
@@ -238,6 +237,36 @@ public:
 			}
 			break;
 		case SkinningMethod::DQS:
+			// TODO: Using Dual Quaternions Skinning
+#pragma omp parallel for
+			for (int i = 0; i < nv; ++i) {
+				DualQuaternion<double> blendedDQ;
+				blendedDQ.real = Quaternion<double>(0, 0, 0, 0); // Initialize to zero quaternion
+				blendedDQ.dual = Quaternion<double>(0, 0, 0, 0); // Initialize to zero quaternion
+
+#ifdef PP_RELEASE
+				Vector3 newPos(0.0, 0.0, 0.0);
+				for (const auto& weightPair : nzweights[i]) {
+					int boneIndex = weightPair.first;
+					double weight = weightPair.second;
+					DualQuaternion<double> dq = transformToDualQuat(transforms[boneIndex]);
+					normalize(dq); // Ensure the blended dual quaternion is normalized
+					newPos += transformPoint(dq, mesh.vertices[i].pos) * weight;
+				}
+				out.vertices[i].pos = newPos;
+#else
+				for (const auto& weightPair : nzweights[i]) {
+					int boneIndex = weightPair.first;
+					double weight = weightPair.second;
+					DualQuaternion<double> dq = transformToDualQuat(transforms[boneIndex]);
+					blendedDQ = blendedDQ + (dq * weight);
+				}
+				normalize(blendedDQ); // Ensure the blended dual quaternion is normalized
+				// Transform the vertex position using the blended dual quaternion
+				Vector3 newPos = transformPoint(blendedDQ, mesh.vertices[i].pos);
+				out.vertices[i].pos = newPos;
+#endif // 1
+			}
 			break;
 		default:
 			break;

@@ -1,4 +1,4 @@
-/*  This file is part of the Pinocchio automatic rigging library.
+﻿/*  This file is part of the Pinocchio automatic rigging library.
 	Copyright (C) 2007 Ilya Baran (ibaran@mit.edu)
 
 	This library is free software; you can redistribute it and/or
@@ -25,9 +25,12 @@ template<class Real = double>
 class Quaternion //normalized quaternion for representing rotations
 {
 public:
+	Real r;
+	Vector<Real, 3> v;
 	//constructors
 	Quaternion() : r(1.) { } //initialize to identity
 	Quaternion(const Quaternion &q) : r(q.r), v(q.v) {} //copy constructor
+
 	template<class R> Quaternion(const Quaternion<R> &q) : r(q.r), v(q.v) {} //convert quaternions of other types
 	//axis angle constructor:
 	template<class R> Quaternion(const Vector<R, 3> &axis, const R &angle) : r(cos(angle * Real(0.5))), v(sin(angle * Real(0.5)) * axis.normalize()) {}
@@ -53,10 +56,20 @@ public:
 		}
 	}
 
-	//quaternion multiplication
+	// change constructor to public by Yulong He
+	Quaternion(const Real& inR, const Vector<Real, 3>& inV) : r(inR), v(inV) {}
+	// create new constructor by Yulong He
+	Quaternion(Real _x, Real _y, Real _z, Real _w) : r(_w), v(_x, _y, _z) {}
+	
+	// quaternion multiplication
 	Quaternion operator*(const Quaternion &q) const { return Quaternion(r * q.r - v * q.v, r * q.v + q.r * v + v % q.v); }
 	
-	//transforming a vector
+	// Scalar multiplication by Yulong He
+	Quaternion operator*(const Real& scalar) const {
+		return Quaternion(r * scalar, v * scalar);
+	}
+
+	// Transforming a vector
 	Vector<Real, 3> operator*(const Vector<Real, 3> &p) const
 	{
 		Vector<Real, 3> v2 = v + v;
@@ -68,7 +81,7 @@ public:
 							   p[2] * (Real(1.) - vsq2[0] - vsq2[1]) + p[0] * (vv2[1] - rv2[1]) + p[1] * (vv2[0] + rv2[0]));
 	}
 
-	//equality
+	// Equality
 	template<class R> bool operator==(const Quaternion<R> &oth) const
 	{
 		return (r == oth.r && v == oth.v) || (r == -oth.r && v == -oth.v);
@@ -85,12 +98,36 @@ public:
 		r = inR * ratio; v = inV * ratio; //normalize
 	}
 	
-private:
-	Quaternion(const Real &inR, const Vector<Real, 3> &inV) : r(inR), v(inV) {}
-	
-	Real r;
-	Vector<Real, 3> v;
+	//// Quaternion multiplication by Yulong He
+	//Quaternion operator*(const Quaternion& q) const {
+	//	return Quaternion(r * q.r - v * q.v, r * q.v + q.r * v + v % q.v);
+	//}
 };
+
+// created by Yulong He
+template<class Real = double>
+Quaternion<Real> operator+(const Quaternion<Real>& a, const Quaternion<Real>& b) {
+	return Quaternion<Real>(
+		a.r + b.r,
+		a.v + b.v
+	);
+}
+// created by Yulong He
+//template<class Real = double>
+//Quaternion<Real> operator*(const Quaternion<Real>& a, Real b) {
+//	return Quaternion(
+//		a * b,
+//		a.r * r
+//	);
+//}
+template<class Real = double>
+Real dot(const Quaternion<Real>& a, const Quaternion<Real>& b) {
+	return a.r * b.r + a.v[0] * b.v[0] + a.v[1] * b.v[1] + a.v[2] * b.v[2];
+}
+template<class Real = double>
+Quaternion<Real> conjugate(const Quaternion<Real>& q) {
+	return Quaternion<Real>(q.r, -q.v);
+}
 
 template<class Real = double> class Transform { //T(v) = (rot * v * scale) + trans
 public:
@@ -114,7 +151,7 @@ public:
 	Vec getTrans() const { return trans; }
 	Quaternion<Real> getRot() const { return rot; }
 	
-private:
+public:
 	Quaternion<Real> rot;
 	Real scale;
 	Vec trans;

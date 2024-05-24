@@ -79,7 +79,7 @@ public:
 	Vector<double, -1> getWeights(int i) const;
 private:
 	AttachmentPrivate *m_AttachmentCore;
-	SkinningMethod m_SkinningMethod = SkinningMethod::LBS;
+	SkinningMethod m_SkinningMethod = SkinningMethod::DQS;
 };
 
 #endif
