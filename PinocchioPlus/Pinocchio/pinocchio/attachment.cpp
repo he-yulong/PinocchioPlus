@@ -48,114 +48,92 @@ class AttachmentPrivate1 : public AttachmentPrivate
 {
 public:
 	AttachmentPrivate1() {}
-
+	// refactoring the code by yulong
 	AttachmentPrivate1(const Mesh& mesh, const Skeleton& skeleton, const vector<Vector3>& match, const VisibilityTester* tester,
 		double initialHeatWeight)
 	{
-		int i, j;
 		int nv = mesh.vertices.size();
-		// compute edges
-		vector<vector<int>> edges(nv); // one-ring neighbors
+		weights.resize(nv);
 
-		for (i = 0; i < nv; ++i)
-		{
-			int cur, start;
-			cur = start = mesh.vertices[i].edge;
-			do
-			{
+		// Compute one-ring neighbors (edges)
+		vector<vector<int>> edges(nv);
+		for (int i = 0; i < nv; ++i) {
+			int cur = mesh.vertices[i].edge;
+			int start = cur;
+			do {
 				edges[i].push_back(mesh.edges[cur].vertex);
 				cur = mesh.edges[mesh.edges[cur].prev].twin;
 			} while (cur != start);
 		}
 
+		// Initialize weights
 		weights.resize(nv);
-		int bones = skeleton.fGraph().verts.size() - 1;
 
-		for (i = 0; i < nv; ++i) // initialize the weights vectors so they are big enough
+		int bones = skeleton.fGraph().verts.size() - 1;
+		for (int i = 0; i < nv; ++i) // initialize the weights vectors so they are big enough
 			weights[i][bones - 1] = 0.;
 
-		vector<vector<double>> boneDists(nv);
-		vector<vector<bool>> boneVis(nv);
+		vector<vector<double>> boneDists(nv, vector<double>(bones, -1.0));
+		vector<vector<bool>> boneVis(nv, vector<bool>(bones, false));
 
-		for (i = 0; i < nv; ++i)
-		{
-			boneDists[i].resize(bones, -1);
-			boneVis[i].resize(bones);
+		// Calculate distances and visibility
+		for (int i = 0; i < nv; ++i) {
 			Vector3 cPos = mesh.vertices[i].pos;
-
 			vector<Vector3> normals;
-			for (j = 0; j < (int)edges[i].size(); ++j)
-			{
+			for (size_t j = 0; j < edges[i].size(); ++j) {
 				int nj = (j + 1) % edges[i].size();
 				Vector3 v1 = mesh.vertices[edges[i][j]].pos - cPos;
 				Vector3 v2 = mesh.vertices[edges[i][nj]].pos - cPos;
 				normals.push_back((v1 % v2).normalize());
 			}
 
-			double minDist = 1e37; // cal the distance from vertex_i to each bone
-			for (j = 1; j <= bones; ++j)
-			{
-				const Vector3& v1 = match[j], & v2 = match[skeleton.fPrev()[j]];
+			double minDist = std::numeric_limits<double>::max();
+			for (int j = 1; j <= bones; ++j) {
+				const Vector3& v1 = match[j];
+				const Vector3& v2 = match[skeleton.fPrev()[j]];
 				boneDists[i][j - 1] = sqrt(distsqToSeg(cPos, v1, v2));
-				minDist = min(boneDists[i][j - 1], minDist);
+				minDist = std::min(boneDists[i][j - 1], minDist);
 			}
-			for (j = 1; j <= bones; ++j)
-			{
-				// the reason we don't just pick the closest bone is so that if two are
-				// equally close, both are factored in.
+			for (int j = 1; j <= bones; ++j) {
 				if (boneDists[i][j - 1] > minDist * 1.0001)
 					continue;
 
-				const Vector3& v1 = match[j], & v2 = match[skeleton.fPrev()[j]];
-				Vector3 p = projToSeg(cPos, v1, v2);                                            // cansee: line segment (cpos-projected cpos on bone) inside the surface
-				boneVis[i][j - 1] = tester->canSee(cPos, p) && vectorInCone(cPos - p, normals); // vector_in_cone: line segment inside the radiance field of vertex_i's one ring
+				const Vector3& v1 = match[j];
+				const Vector3& v2 = match[skeleton.fPrev()[j]];
+				Vector3 p = projToSeg(cPos, v1, v2);
+				boneVis[i][j - 1] = tester->canSee(cPos, p) && vectorInCone(cPos - p, normals);
 			}
 		}
 
-		// We have -Lw+Hw=HI, same as (H-L)w=HI, with (H-L)=DA (with D=diag(1./area))
-		// so w = A^-1 (HI/D)
-
+		// Construct Laplacian matrix and solve for weights
 		vector<vector<pair<int, double>>> A(nv);
-		vector<double> D(nv, 0.), H(nv, 0.);
+		vector<double> D(nv, 0.0), H(nv, 0.0);
 		vector<int> closest(nv, -1);
-		for (i = 0; i < nv; ++i)
-		{
-			// get areas
-			for (j = 0; j < (int)edges[i].size(); ++j)
-			{
+
+		for (int i = 0; i < nv; ++i) {
+			for (size_t j = 0; j < edges[i].size(); ++j) {
 				int nj = (j + 1) % edges[i].size();
-
 				D[i] += ((mesh.vertices[edges[i][j]].pos - mesh.vertices[i].pos) %
-					(mesh.vertices[edges[i][nj]].pos - mesh.vertices[i].pos))
-					.length();
+					(mesh.vertices[edges[i][nj]].pos - mesh.vertices[i].pos)).length();
 			}
-			D[i] = 1. / (1e-10 + D[i]);
+			D[i] = 1.0 / (1e-10 + D[i]);
 
-			// get bones
-			double minDist = 1e37;
-			for (j = 0; j < bones; ++j)
-			{
-				// Would like to change to:
-				//   if(boneDists[i][j] < minDist && boneVis[i][j])
-				// but need to make boneVis more robust - ie, check
-				// if the bone is initially outside the mesh, etc
-				if (boneDists[i][j] < minDist)
-				{
+			double minDist = std::numeric_limits<double>::max();
+			for (int j = 0; j < bones; ++j) {
+				if (boneDists[i][j] < minDist) {
 					closest[i] = j;
 					minDist = boneDists[i][j];
 				}
 			}
-			for (j = 0; j < bones; ++j)
+			for (int j = 0; j < bones; ++j) {
 				if (boneVis[i][j] && boneDists[i][j] <= minDist * 1.00001)
 					H[i] += initialHeatWeight / SQR(1e-8 + boneDists[i][closest[i]]);
+			}
 
-			// get laplacian
-			double sum = 0.;
-			for (j = 0; j < (int)edges[i].size(); ++j)
-			{
+			double sum = 0.0;
+			for (size_t j = 0; j < edges[i].size(); ++j) {
 				int nj = (j + 1) % edges[i].size();
 				int pj = (j + edges[i].size() - 1) % edges[i].size();
-
 				Vector3 v1 = mesh.vertices[i].pos - mesh.vertices[edges[i][pj]].pos;
 				Vector3 v2 = mesh.vertices[edges[i][j]].pos - mesh.vertices[edges[i][pj]].pos;
 				Vector3 v3 = mesh.vertices[i].pos - mesh.vertices[edges[i][nj]].pos;
@@ -165,56 +143,49 @@ public:
 				double cot2 = (v3 * v4) / (1e-6 + (v3 % v4).length());
 				sum += (cot1 + cot2);
 
-				if (edges[i][j] > i) // check for triangular here because sum should be computed regardless
+				if (edges[i][j] > i)
 					continue;
-				A[i].push_back(make_pair(edges[i][j], -cot1 - cot2));
+				A[i].push_back({ edges[i][j], -cot1 - cot2 });
 			}
-
-			A[i].push_back(make_pair(i, sum + H[i] / D[i]));
-
+			A[i].push_back({ i, sum + H[i] / D[i] });
 			sort(A[i].begin(), A[i].end());
 		}
 
 		nzweights.resize(nv);
 		SPDMatrix Am(A);
 		LLTMatrix* Ainv = Am.factor();
-		if (Ainv == NULL)
+		if (!Ainv)
 			return;
 
-		for (j = 0; j < bones; ++j)
-		{
-			vector<double> rhs(nv, 0.);
-			for (i = 0; i < nv; ++i)
-			{
+		for (int j = 0; j < bones; ++j) {
+			vector<double> rhs(nv, 0.0);
+			for (int i = 0; i < nv; ++i) {
 				if (boneVis[i][j] && boneDists[i][j] <= boneDists[i][closest[i]] * 1.00001)
 					rhs[i] = H[i] / D[i];
 			}
 
 			Ainv->solve(rhs);
-			for (i = 0; i < nv; ++i)
-			{
-				if (rhs[i] > 1.)
-					rhs[i] = 1.; // clip just in case
+			for (int i = 0; i < nv; ++i) {
+				if (rhs[i] > 1.0)
+					rhs[i] = 1.0; // Clip just in case
 				if (rhs[i] > 1e-8)
-					nzweights[i].push_back(make_pair(j, rhs[i]));
+					nzweights[i].push_back({ j, rhs[i] });
 			}
 		}
 
-		for (i = 0; i < nv; ++i)
-		{
-			double sum = 0.;
-			for (j = 0; j < (int)nzweights[i].size(); ++j)
-				sum += nzweights[i][j].second;
+		for (int i = 0; i < nv; ++i) {
+			double sum = 0.0;
+			for (const auto& weight : nzweights[i])
+				sum += weight.second;
 
-			for (j = 0; j < (int)nzweights[i].size(); ++j)
-			{
-				nzweights[i][j].second /= sum;
-				weights[i][nzweights[i][j].first] = nzweights[i][j].second;
-			}
+			for (auto& weight : nzweights[i])
+				weight.second /= sum;
+
+			for (const auto& weight : nzweights[i])
+				weights[i][weight.first] = weight.second;
 		}
 
 		delete Ainv;
-		return;
 	}
 
 	Mesh deform(const Mesh& mesh, const std::vector<Transform<>>& transforms, SkinningMethod method) const {
