@@ -183,7 +183,7 @@ void process(const vector<string> &args, MyWindow *w)
 	}
 
 	PinocchioOutput o;
-
+	std::clock_t start = std::clock(); //only compute time of embedding and attachment without load mesh
 	if (!a.noFit)
 	{ // do everything
 		o = autorig(given, m);
@@ -261,6 +261,9 @@ void process(const vector<string> &args, MyWindow *w)
 		}
 		astrm << endl;
 	}
+	std::clock_t end = std::clock();
+    double duration = double(end - start) / CLOCKS_PER_SEC;
+    std::cout << "Execution time: " << duration << " seconds" << std::endl;
 
 	delete o.attachment;
 }

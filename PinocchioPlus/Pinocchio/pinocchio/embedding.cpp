@@ -122,7 +122,6 @@ double computePenalty(const vector<PenaltyFunction *> &penaltyFunctions,
 	}
 	return out;
 }
-
 std::vector<int> discreteEmbed(const PtGraph& graph, const vector<Sphere>& spheres,
 	const Skeleton& skeleton, const vector<vector<int> >& possibilities)
 {
@@ -145,63 +144,93 @@ std::vector<int> discreteEmbed(const PtGraph& graph, const vector<Sphere>& spher
 
 	int maxSz = 0;
 
-	while (!todo.empty()) {
-		PartialMatch cur = todo.top();
-		todo.pop();
+	std::mutex todoMutex;
 
-		int idx = cur.match.size();
+	auto worker = [&](int start, int end) {
+		while (true) {
+			todoMutex.lock();
+			if (todo.empty()) {
+				todoMutex.unlock();
+				return;
+			}
+			PartialMatch cur = todo.top();
+			todo.pop();
+			todoMutex.unlock();
 
-		int curSz = log((double)todo.size());
-		if (curSz > maxSz) {
-			maxSz = curSz;
-			if (maxSz > 3)
-				std::cout << "Reached " << todo.size() << std::endl;
-		}
+			int idx = cur.match.size();
 
-		if (idx == toMatch) {
-			output = cur;
-			std::cout << "Found: residual = " << cur.penalty << std::endl;
-			break;
-		}
+			int curSz = log((double)todo.size());
+			if (curSz > maxSz) {
+				maxSz = curSz;
+				if (maxSz > 3)
+					std::cout << "Reached " << todo.size() << std::endl;
+			}
 
-		for (int i = 0; i < possibilities[idx].size(); ++i) {
-			int candidate = possibilities[idx][i];
-			double extraPenalty = computePenalty(penaltyFunctions, cur, candidate);
+			if (idx == toMatch) {
+				todoMutex.lock();
+				output = cur;
+				std::cout << "Found: residual = " << cur.penalty << std::endl;
+				while (!todo.empty()) todo.pop();
+				todoMutex.unlock();
+				return;
+			}
 
-			if (extraPenalty < 0)
-				std::cout << "ERR = " << extraPenalty << std::endl;
-			if (cur.penalty + extraPenalty < 1.) {
-				PartialMatch next = cur;
-				next.match.push_back(candidate);
-				next.penalty += extraPenalty;
-				next.heuristic = next.penalty;
+			for (int i = start; i < end && i < possibilities[idx].size(); ++i) {
+				int candidate = possibilities[idx][i];
+				double extraPenalty = computePenalty(penaltyFunctions, cur, candidate);
 
-				//compute taken vertices and edges
-				if (idx > 0) {
-					vector<int> path = fp.paths.path(candidate, next.match[skeleton.cPrev()[idx]]);
-					for (int j = 0; j < path.size(); ++j)
-						next.vTaken[path[j]] = true;
-				}
+				if (extraPenalty < 0)
+					std::cout << "ERR = " << extraPenalty << std::endl;
+				if (cur.penalty + extraPenalty < 1.) {
+					PartialMatch next = cur;
+					next.match.push_back(candidate);
+					next.penalty += extraPenalty;
+					next.heuristic = next.penalty;
 
-				//compute heuristic
-				for (int j = idx + 1; j < toMatch; ++j) {
-					if (skeleton.cPrev()[j] > idx)
-						continue;
-					double minP = 1e37;
-					for (int k = 0; k < (int)possibilities[j].size(); ++k) {
-						minP = min(minP, computePenalty(penaltyFunctions, next, possibilities[j][k], j));
+					//compute taken vertices and edges
+					if (idx > 0) {
+						vector<int> path = fp.paths.path(candidate, next.match[skeleton.cPrev()[idx]]);
+						for (int j = 0; j < path.size(); ++j)
+							next.vTaken[path[j]] = true;
 					}
-					next.heuristic += minP;
+
+					//compute heuristic
+					for (int j = idx + 1; j < toMatch; ++j) {
+						if (skeleton.cPrev()[j] > idx)
+							continue;
+						double minP = 1e37;
+						for (int k = 0; k < (int)possibilities[j].size(); ++k) {
+							minP = min(minP, computePenalty(penaltyFunctions, next, possibilities[j][k], j));
+						}
+						next.heuristic += minP;
+						if (next.heuristic > 1.)
+							break;
+					}
+
 					if (next.heuristic > 1.)
-						break;
+						continue;
+
+					todoMutex.lock();
+					todo.push(next);
+					todoMutex.unlock();
 				}
-
-				if (next.heuristic > 1.)
-					continue;
-
-				todo.push(next);
 			}
 		}
+	};
+
+	std::vector<std::thread> threads;
+	unsigned int numThreads = std::thread::hardware_concurrency();
+	if (numThreads == 0) numThreads = 1;
+
+	int step = possibilities[0].size() / numThreads;
+	for (unsigned int t = 0; t < numThreads; ++t) {
+		int start = t * step;
+		int end = (t == numThreads - 1) ? possibilities[0].size() : (t + 1) * step;
+		threads.emplace_back(worker, start, end);
+	}
+
+	for (auto& thread : threads) {
+		thread.join();
 	}
 
 	if (output.match.size() == 0)

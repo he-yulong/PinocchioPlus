@@ -37,7 +37,7 @@ Under Linux, make sure LD_LIBRARY_PATH is set so that DemoUI can see
 libpinocchio.so.
 
 First try running with the given objects:
-DemoUI data/test.obj -motion data/walk.txt
+DemoUI data/test.obj -motion data/walk.txt %change
 
 After about 10 seconds, a window should open and a guy should walk
 around in it.
