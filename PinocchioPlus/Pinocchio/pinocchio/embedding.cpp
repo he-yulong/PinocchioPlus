@@ -122,6 +122,100 @@ double computePenalty(const vector<PenaltyFunction *> &penaltyFunctions,
 	}
 	return out;
 }
+
+#if defined(WIN32)
+std::vector<int> discreteEmbed(const PtGraph& graph, const vector<Sphere>& spheres,
+	const Skeleton& skeleton, const vector<vector<int> >& possibilities)
+{
+	FP fp(graph, skeleton, spheres);
+
+	fp.footBase = 1.;
+	for (int i = 0; i < (int)graph.verts.size(); ++i)
+		fp.footBase = std::min(fp.footBase, graph.verts[i][1]);
+
+	std::vector<PenaltyFunction*> penaltyFunctions = getPenaltyFunctions(&fp);
+
+	int toMatch = skeleton.cGraph().verts.size();
+
+	PP_CORE_DEBUG("Matching!");
+
+	priority_queue<PartialMatch> todo;
+
+	PartialMatch output(graph.verts.size());
+	todo.push(output);
+
+	int maxSz = 0;
+
+	while (!todo.empty()) {
+		PartialMatch cur = todo.top();
+		todo.pop();
+
+		int idx = cur.match.size();
+
+		int curSz = log((double)todo.size());
+		if (curSz > maxSz) {
+			maxSz = curSz;
+			if (maxSz > 3)
+				std::cout << "Reached " << todo.size() << std::endl;
+		}
+
+		if (idx == toMatch) {
+			output = cur;
+			std::cout << "Found: residual = " << cur.penalty << std::endl;
+			break;
+		}
+
+		for (int i = 0; i < possibilities[idx].size(); ++i) {
+			int candidate = possibilities[idx][i];
+			double extraPenalty = computePenalty(penaltyFunctions, cur, candidate);
+
+			if (extraPenalty < 0)
+				std::cout << "ERR = " << extraPenalty << std::endl;
+			if (cur.penalty + extraPenalty < 1.) {
+				PartialMatch next = cur;
+				next.match.push_back(candidate);
+				next.penalty += extraPenalty;
+				next.heuristic = next.penalty;
+
+				//compute taken vertices and edges
+				if (idx > 0) {
+					vector<int> path = fp.paths.path(candidate, next.match[skeleton.cPrev()[idx]]);
+					for (int j = 0; j < path.size(); ++j)
+						next.vTaken[path[j]] = true;
+				}
+
+				//compute heuristic
+				for (int j = idx + 1; j < toMatch; ++j) {
+					if (skeleton.cPrev()[j] > idx)
+						continue;
+					double minP = 1e37;
+					for (int k = 0; k < (int)possibilities[j].size(); ++k) {
+						minP = min(minP, computePenalty(penaltyFunctions, next, possibilities[j][k], j));
+					}
+					next.heuristic += minP;
+					if (next.heuristic > 1.)
+						break;
+				}
+
+				if (next.heuristic > 1.)
+					continue;
+
+				todo.push(next);
+			}
+		}
+	}
+
+	if (output.match.size() == 0)
+	{
+		std::cout << "No Match" << std::endl;
+	}
+
+	for (int i = 0; i < penaltyFunctions.size(); ++i)
+		delete penaltyFunctions[i];
+
+	return output.match;
+}
+#else
 std::vector<int> discreteEmbed(const PtGraph& graph, const vector<Sphere>& spheres,
 	const Skeleton& skeleton, const vector<vector<int> >& possibilities)
 {
@@ -243,6 +337,7 @@ std::vector<int> discreteEmbed(const PtGraph& graph, const vector<Sphere>& spher
 
 	return output.match;
 }
+#endif
 
 vector<Vector3> splitPath(FP *fp, int joint, int curIdx, int prevIdx)
 {
