@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.1...3.15)
 project(Pinocchio)
 
-# set(CMAKE_BUILD_TYPE RELEASE)
+set(CMAKE_BUILD_TYPE RELEASE)
 
 
 add_subdirectory(Pinocchio)

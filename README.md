@@ -4,15 +4,15 @@ This repository is conducting a research on the paper "Automatic Rigging and ani
 
 ## 1 Installation
 
-### 1.1 Ubuntu 18.04
+### 1.1 Ubuntu 18.04 (Prefered)
 
-[jingma-git/Pinocchio](https://github.com/jingma-git/Pinocchio) dependencies:
+dependencies:
 - `sudo apt-get install libfltk1.3-dev`
 - `sudo apt-get install libxrender-dev libxcursor-dev libxft-dev libfontconfig-dev libxinerama-dev`
 
 #### 1.1.1 Option 1: cmake
 
-PinocchioJingma and PinocchioPlus are seperated projects.
+PinocchioJingma([jingma-git/Pinocchio](https://github.com/jingma-git/Pinocchio)) and PinocchioPlus are seperated projects.
 
 ```
 # In the PinocchioJingma directory
@@ -20,6 +20,12 @@ mkdir build
 cd build
 cmake ..
 make
+```
+
+Example:
+
+```
+./DemoUI ../../data/FinalBaseMesh.obj -motion ../../data/legacy/walk.txt
 ```
 
 ```
@@ -38,29 +44,6 @@ Example:
 
 Targets will be in the build directory.
 
-#### 1.1.2 Option 2: premake5
-
-In premake5, PinocchioJingma and PinocchioPlus are in the same workspace.
-
-```
-# root directory
-./generate-gmake2.sh 
-cd project-files
-make
-```
-
-Then you can check out the `bin` directory.
-
-Example:
-
-```
-./PinocchioJingmaDemoUI ../../../data/FinalBaseMesh.obj -motion ../../../data/legacy/walk.txt
-```
-
-```
-./PinocchioPlusDemoUI ../../../data/FinalBaseMesh.obj -motion ../../../data/legacy/walk.txt
-```
-
 ### 1.2 Windows (Visual Studio 2022)
 
 NOTE: 
@@ -71,7 +54,7 @@ NOTE:
 
 click `generate-vs2022.bat`, then open up `PinocchioPlus.sln` in `project-files`.
 
-- `PinocchioPlus***` are our project implementations. 
+- `PinocchioPlus***` are our project implementations. We keep the code base as it is. So it can not be compiled in VS2022.
 - `PinocchioJingma***` are from [jingma-git/Pinocchio](https://github.com/jingma-git/Pinocchio).
 
 All dependencies should be included.
@@ -82,7 +65,30 @@ Example:
 ./PinocchioPlusDemoUI ../../../data/FinalBaseMesh.obj -motion ../../../data/legacy/walk.txt
 ```
 
-## 2 Useful References
+## 2 Usage
+
+### 2.1 Skinning options
+
+LBS:
+
+```
+./PinocchioPlusDemoUI ../../data/FinalBaseMesh.obj -motion ../../data/legacy/walk_made_by_yulong_.txt
+```
+
+DQS:
+
+```
+./PinocchioPlusDemoUI ../../data/FinalBaseMesh.obj -dqs -motion ../../data/legacy/walk_made_by_yulong_.txt
+```
+
+### 2.2 Mesh fixing
+
+```
+# In the mesh_fix&simplify directory
+python fix.py
+```
+
+## 3 Useful References
 
 - Repository
   - [jingma-git/Pinocchio](https://github.com/jingma-git/Pinocchio)
